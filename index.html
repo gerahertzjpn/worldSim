@@ -1,0 +1,1450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ConwayBox — a worldbox built on Conway's Game of Life</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #141925;
+    --panel2: #1c2334;
+    --ink: #e6edf3;
+    --muted: #8b98ac;
+    --accent: #4ea8de;
+    --accent2: #7be0ad;
+    --danger: #e06c75;
+    --border: #2a3450;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    overflow: hidden; user-select: none;
+  }
+  #app { display: flex; height: 100vh; width: 100vw; }
+  #stage {
+    flex: 1; position: relative; display: flex;
+    align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 30% 20%, #101826 0, transparent 60%),
+      #05070c;
+    overflow: hidden;
+  }
+  canvas { display: block; width: 100%; height: 100%; cursor: crosshair;
+           image-rendering: pixelated; background: #05070c; }
+  #side {
+    width: 290px; background: var(--panel); border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow-y: auto;
+  }
+  #side::-webkit-scrollbar { width: 8px; }
+  #side::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .brand { padding: 14px 16px 8px; }
+  .brand h1 { margin: 0; font-size: 16px; letter-spacing: .5px; }
+  .brand p { margin: 4px 0 0; font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .section { padding: 10px 16px; border-top: 1px solid var(--border); }
+  .section h2 { margin: 0 0 8px; font-size: 11px; text-transform: uppercase;
+                letter-spacing: 1px; color: var(--muted); }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .tool {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    padding: 8px 4px; background: var(--panel2); border: 1px solid var(--border);
+    border-radius: 8px; cursor: pointer; font-size: 11px; transition: .12s;
+  }
+  .tool:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .tool.active { border-color: var(--accent2); background: #223; box-shadow: 0 0 0 1px var(--accent2) inset; }
+  .tool .ic { font-size: 18px; }
+  .row { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 12px; }
+  .row label { flex: 1; color: var(--muted); }
+  .row input[type=range] { flex: 1.2; accent-color: var(--accent); }
+  .row .val { width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+  .btns { display: flex; gap: 6px; flex-wrap: wrap; }
+  button.act {
+    flex: 1; padding: 8px; background: var(--panel2); color: var(--ink);
+    border: 1px solid var(--border); border-radius: 8px; cursor: pointer;
+    font-size: 12px; transition: .12s;
+  }
+  button.act:hover { border-color: var(--accent); }
+  button.act.primary { background: var(--accent); color: #05101a; border-color: var(--accent); font-weight: 600; }
+  button.act.primary.paused { background: var(--accent2); }
+  .stats { font-size: 11px; color: var(--muted); line-height: 1.7; font-variant-numeric: tabular-nums; }
+  .stats b { color: var(--ink); font-weight: 600; }
+  .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 11px; }
+  .legend .li { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+  .sw { width: 12px; height: 12px; border-radius: 3px; border: 1px solid #0006; }
+  .hint { font-size: 10.5px; color: var(--muted); line-height: 1.5; }
+  kbd { background: var(--panel2); border: 1px solid var(--border); border-bottom-width: 2px;
+        border-radius: 4px; padding: 0 5px; font-size: 10px; }
+  .fac { display: flex; align-items: center; gap: 6px; font-size: 11px; margin: 3px 0;
+         font-variant-numeric: tabular-nums; }
+  .facdot { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; border: 1px solid #0006; }
+  .facname { flex: 0 0 64px; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .facbarwrap { flex: 1; height: 8px; background: var(--panel2); border-radius: 4px; overflow: hidden; }
+  .facbar { display: block; height: 100%; border-radius: 4px; transition: width .25s; }
+  .facpop { flex: 0 0 38px; text-align: right; color: var(--muted); }
+  .factrend { flex: 0 0 12px; text-align: center; }
+  .presets { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-bottom: 10px; }
+  .preset { padding: 6px 4px; background: var(--panel2); border: 1px solid var(--border);
+            border-radius: 7px; cursor: pointer; font-size: 11px; text-align: center; transition: .12s; }
+  .preset:hover { border-color: var(--accent); transform: translateY(-1px); }
+  #overlay-info {
+    position: absolute; top: 10px; left: 12px; font-size: 11px; color: var(--muted);
+    background: #0008; padding: 6px 10px; border-radius: 8px; pointer-events: none;
+    backdrop-filter: blur(4px); border: 1px solid var(--border);
+    font-variant-numeric: tabular-nums;
+  }
+  #toast {
+    position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    background: var(--panel2); border: 1px solid var(--accent); color: var(--ink);
+    padding: 8px 16px; border-radius: 20px; font-size: 12px; opacity: 0;
+    transition: opacity .3s; pointer-events: none;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div id="overlay-info"></div>
+    <div id="toast"></div>
+  </div>
+  <aside id="side">
+    <div class="brand">
+      <h1>🌍 ConwayBox</h1>
+      <p>A worldbox simulator with <b>Conway's Game&nbsp;of&nbsp;Life</b> at its core.
+         Land, water, fire, forest and climate are all Conway-family cellular automata.
+         Civilizations are living B3/S23 colonies whose <b>territory flows</b> across the map,
+         expanding over rich land and launching <b>gliders</b> to found distant colonies.</p>
+    </div>
+
+    <div class="section">
+      <h2>World Generation</h2>
+      <div class="presets" id="presets"></div>
+      <div class="row"><label title="Higher = more land, less ocean">Sea level</label>
+        <input type="range" id="p_sea" min="30" max="62" value="46" /><span class="val" id="p_seaV">46</span></div>
+      <div class="row"><label title="More passes = smoother, larger continents">Smoothing</label>
+        <input type="range" id="p_smooth" min="2" max="16" value="8" /><span class="val" id="p_smoothV">8</span></div>
+      <div class="row"><label title="Global temperature: cold ↔ hot">Climate</label>
+        <input type="range" id="p_climate" min="-60" max="60" value="0" /><span class="val" id="p_climateV">0</span></div>
+      <div class="row"><label title="Global humidity: arid ↔ lush">Humidity</label>
+        <input type="range" id="p_humid" min="-80" max="80" value="0" /><span class="val" id="p_humidV">0</span></div>
+      <div class="row"><label title="How much land starts forested">Forest</label>
+        <input type="range" id="p_forest" min="0" max="60" value="18" /><span class="val" id="p_forestV">18%</span></div>
+      <div class="row"><label title="Number of starting civilizations">Colonies</label>
+        <input type="range" id="p_col" min="0" max="40" value="7" /><span class="val" id="p_colV">7</span></div>
+      <div class="row"><label title="Seed for reproducible worlds (0 = random)">Seed</label>
+        <input type="number" id="p_seed" value="0" min="0" style="flex:1.2;width:0;background:var(--panel2);color:var(--ink);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:12px" /></div>
+      <div class="btns" style="margin-top:6px">
+        <button class="act primary" id="genBtn">🌐 Generate World</button>
+        <button class="act" id="randBtn" title="Randomize all parameters">🎲</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>God Tools</h2>
+      <div class="tools" id="tools"></div>
+    </div>
+
+    <div class="section">
+      <h2>Brush</h2>
+      <div class="row">
+        <label>Size</label>
+        <input type="range" id="brush" min="1" max="40" value="7" />
+        <span class="val" id="brushVal">7</span>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>Simulation</h2>
+      <div class="btns" style="margin-bottom:8px">
+        <button class="act primary" id="playBtn">⏸ Pause</button>
+        <button class="act" id="stepBtn">⏭ Step</button>
+      </div>
+      <div class="row">
+        <label>Speed</label>
+        <input type="range" id="speed" min="1" max="60" value="18" />
+        <span class="val" id="speedVal">18</span>
+      </div>
+      <div class="row" title="Pixel size. Smaller = sharper & more detail (heavier); larger = chunkier (lighter). Rebuilds the world.">
+        <label>Detail</label>
+        <input type="range" id="res" min="2" max="10" value="4" />
+        <span class="val" id="resVal">4px</span>
+      </div>
+      <div class="btns">
+        <button class="act" id="clearBtn">🧹 Clear Life</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <h2>World</h2>
+      <div class="stats" id="stats"></div>
+    </div>
+
+    <div class="section">
+      <h2>Civilizations</h2>
+      <div id="factions"></div>
+    </div>
+
+    <div class="section">
+      <h2>Legend</h2>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="section">
+      <h2>Controls</h2>
+      <div class="hint">
+        <b>Drag</b> to paint with the selected tool.<br/>
+        <kbd>Space</kbd> play/pause · <kbd>S</kbd> step · <kbd>1–9</kbd> tools<br/>
+        <kbd>[</kbd> <kbd>]</kbd> brush size · <kbd>C</kbd> clear · <kbd>N</kbd> new world
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+"use strict";
+/* =========================================================================
+   ConwayBox — a worldbox built entirely on Conway's Game of Life.
+
+   Architecture: the world is a stack of cellular-automaton layers, every one
+   of them a Conway-family totalistic (neighbour-count) rule:
+
+     LIFE    — the literal Conway B3/S23 rule. Living matter / colonies.
+     TERRAIN — majority-smoothing CA: land emerges and erodes.
+     WATER   — Conway-variant CA seeded by low terrain: seas & lakes.
+     FOREST  — slow birth/survival CA on land: vegetation life feeds on.
+     FIRE    — spreading CA: ignites forest & life, then burns out.
+
+   Worldbox "god powers" all work by writing cells into these grids.
+   Civilizations are connected clusters of LIFE cells, given a stable faction
+   colour tracked across generations. Nothing escapes the CA — even the player
+   only ever edits Conway-family grids.
+   ========================================================================= */
+
+let W = 0, H = 0;                // world grid in cells (sized to fit the screen on boot)
+let CELL = 4;                    // target pixels per cell (sets effective resolution)
+
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+/* ---- grids (flat typed arrays, double-buffered) ---------------------- */
+/* The grid is re-sized to the screen, so N and the arrays are (re)allocated
+   by allocGrids() rather than fixed at load time. */
+let N = W * H;
+let idx = (x, y) => y * W + x;
+
+// LIFE: 0 dead, else faction id (1..). Conway B3/S23 on (cell>0).
+let life, lifeNext;
+// TERRAIN: 0 sea-floor (low), 1 land (high). Smoothing CA.
+let land, landNext;
+// WATER: 0 dry, 1 water. Conway-variant constrained to low terrain.
+let water, waterNext;
+// FOREST: 0 none, 1 forest. Slow growth CA on land.
+let forest, forestNext;
+// FIRE: 0 none, >0 remaining burn ticks. Spreading CA.
+let fire, fireNext;
+// TEMP: 0..255 temperature field. Diffusion CA relaxing toward a latitude
+//       gradient; water moderates, land swings more. (Conway-family: next
+//       state is a function of the cell's neighbourhood average.)
+let temp, tempNext;
+// MOIST: 0..255 humidity field. Diffusion CA sourced by water, dried by heat.
+let moist, moistNext;
+// ICE: 0/1. Water freezes below a temp threshold, melts above. Threshold CA.
+let ice, iceNext;
+// BIOME: derived each frame from temp+moist+land (not a separate simulation).
+let biome;
+// AGE: per-cell how many generations this cell has stayed continuously alive.
+//      Rises while a cell survives, resets to 0 on (re)birth. Old, stable
+//      clusters read as developed "cities"; churny frontier reads as young.
+let age, ageNext;
+// TERRITORY: a competitive-diffusion CA (voter model). terr = owning faction
+//   id per cell; terrStr = how strongly it's held. Living cells inject influence
+//   for their faction (scaled by biome quality); it floods across empty land and
+//   competes, so borders are the moving line where two factions' influence meet.
+let terr, terrNext, terrStr, terrStrNext;
+
+function allocGrids(){
+  N = W * H;
+  idx = (x, y) => y * W + x;
+  life=new Uint16Array(N);  lifeNext=new Uint16Array(N);
+  land=new Uint8Array(N);   landNext=new Uint8Array(N);
+  water=new Uint8Array(N);  waterNext=new Uint8Array(N);
+  forest=new Uint8Array(N); forestNext=new Uint8Array(N);
+  fire=new Uint8Array(N);   fireNext=new Uint8Array(N);
+  temp=new Uint8Array(N);   tempNext=new Uint8Array(N);
+  moist=new Uint8Array(N);  moistNext=new Uint8Array(N);
+  ice=new Uint8Array(N);    iceNext=new Uint8Array(N);
+  biome=new Uint8Array(N);
+  age=new Uint8Array(N);    ageNext=new Uint8Array(N);
+  terr=new Uint8Array(N);   terrNext=new Uint8Array(N);
+  terrStr=new Float32Array(N); terrStrNext=new Float32Array(N);
+}
+allocGrids();
+
+/* ---- biome ids & their base colours ---------------------------------- */
+const B_SEA=0, B_ICE=1, B_SNOW=2, B_TUNDRA=3, B_DESERT=4,
+      B_GRASS=5, B_FOREST=6, B_SWAMP=7, B_SHALLOW=8;
+// [r,g,b] base colour per biome (life/fire/forest drawn on top of these)
+const BIOME_COL = {
+  [B_SEA]:    [20,58,110],
+  [B_SHALLOW]:[46,110,170],
+  [B_ICE]:    [205,225,240],
+  [B_SNOW]:   [228,234,242],
+  [B_TUNDRA]: [120,132,120],
+  [B_DESERT]: [196,176,116],
+  [B_GRASS]:  [120,150,72],
+  [B_FOREST]: [40,104,56],
+  [B_SWAMP]:  [80,104,72],
+};
+
+/* =========================================================================
+   WORLD PARAMETERS — every knob the generator reads. Driven by the UI sliders
+   and the preset buttons. Change these, hit "New World", and the whole CA
+   stack is regenerated under the new conditions.
+   ========================================================================= */
+const worldParams = {
+  seaLevel:    0.46,  // terrain noise threshold: higher => more land
+  landSmooth:  8,     // continent smoothing passes: higher => smoother coasts
+  climate:     0,     // global temperature offset (-60 frozen .. +60 scorched)
+  humidity:    0,     // global humidity offset   (-80 arid  .. +80 lush)
+  forestDens:  0.18,  // fraction of land that starts forested
+  colonies:    7,     // number of starter civilizations
+  lifeDensity: 0.45,  // how dense each starter colony's soup is
+  seed:        0,     // RNG seed (0 = random each time)
+};
+
+// Faction palette — each living colony cluster is recoloured to its faction.
+const FACTIONS = [
+  [78,168,222],[123,224,173],[224,160,108],[200,120,210],
+  [230,210,110],[120,200,230],[235,120,140],[150,220,120]
+];
+const NFAC = FACTIONS.length;
+let nextFaction = 1;
+
+// Per-faction live state, indexed by faction id (1..NFAC), refreshed each step.
+const facPop      = new Int32Array(NFAC+1);   // current population
+const facPrevPop  = new Int32Array(NFAC+1);   // last generation's population (for trend)
+const facVigor    = new Float32Array(NFAC+1); // 0.3..1.6 territorial push (smoothed)
+const facName     = [];                        // display names, index = faction id
+const FAC_NAMES = ['Azurians','Verdani','Amberfolk','Violeti','Goldmark',
+                   'Cyanid','Crimsi','Limeard'];
+for (let f=1; f<=NFAC; f++) facName[f] = FAC_NAMES[(f-1)%FAC_NAMES.length];
+
+// Count current population of every faction (one cheap pass over the grid),
+// rolling the previous counts so growth/decline momentum can be measured.
+function countFactions(){
+  facPrevPop.set(facPop);
+  facPop.fill(0);
+  for (let i=0;i<N;i++){ const v=life[i]; if (v) facPop[v]++; }
+}
+
+// Vigor = how hard a faction pushes its borders, from its size and momentum.
+// A booming empire projects more influence and advances; a declining one
+// retreats. Because GoL populations rise and fall, this makes borders MOVE.
+function updateFactionVigor(){
+  let maxP=1; for (let f=1; f<=NFAC; f++) if (facPop[f]>maxP) maxP=facPop[f];
+  for (let f=1; f<=NFAC; f++){
+    const rel = facPop[f]/maxP;                              // 0..1 relative size
+    const mom = (facPop[f]-facPrevPop[f])/(facPop[f]+30);    // growth momentum
+    const target = 0.45 + rel*0.85 + Math.max(-0.3, Math.min(0.45, mom*5));
+    facVigor[f] += (target - facVigor[f]) * 0.12;            // smooth (war inertia)
+  }
+}
+
+/* ---- random helpers --------------------------------------------------- */
+// Seedable PRNG (mulberry32). `rng()` returns 0..1; generation uses it so a
+// given seed reproduces the same world. Live simulation keeps using Math.random.
+let _rngState = (Math.random()*2**32)>>>0;
+function rng(){
+  _rngState |= 0; _rngState = (_rngState + 0x6D2B79F5) | 0;
+  let t = Math.imul(_rngState ^ (_rngState>>>15), 1 | _rngState);
+  t = (t + Math.imul(t ^ (t>>>7), 61 | t)) ^ t;
+  return ((t ^ (t>>>14)) >>> 0) / 4294967296;
+}
+function seedRng(s){ _rngState = (s>>>0) || ((Math.random()*2**32)>>>0); }
+function rnd(n){ return Math.floor(rng()*n); }
+
+/* =========================================================================
+   WORLD GENERATION — terrain itself is grown by a Conway-family CA.
+   We seed noise then run a majority-smoothing automaton (a totalistic rule:
+   a cell becomes land if >=5 of its 9-neighbourhood are land) to grow
+   organic continents. Same family as Conway, different birth/survival counts.
+   ========================================================================= */
+function generateWorld(){
+  const P = worldParams;
+  seedRng(P.seed);                       // reproducible if a seed is set
+  season = 0;
+  buildLatWarp();                        // wavy climate bands for this world
+
+  // seed terrain noise (seaLevel sets how much becomes land)
+  for (let i=0;i<N;i++) land[i] = rng() < P.seaLevel ? 1 : 0;
+  // smoothing passes -> continents
+  const passes = Math.max(2, P.landSmooth|0);
+  for (let pass=0; pass<passes; pass++){
+    for (let y=0;y<H;y++) for (let x=0;x<W;x++){
+      let c=0;
+      for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+        const nx=x+dx, ny=y+dy;
+        if (nx<0||ny<0||nx>=W||ny>=H){ c++; continue; } // edges bias to land
+        if (land[idx(nx,ny)]) c++;
+      }
+      landNext[idx(x,y)] = c>=5 ? 1 : 0;
+    }
+    [land,landNext]=[landNext,land];
+  }
+  // water fills every non-land cell (the sea), forest sprinkled on land
+  forest.fill(0); water.fill(0); fire.fill(0); life.fill(0); ice.fill(0);
+  for (let i=0;i<N;i++){
+    if (!land[i]) water[i]=1;
+    else if (rng()<P.forestDens) forest[i]=1;
+  }
+  // seed the climate fields, then relax. (climate offset lives inside
+  // latitudeTemp so stepTemp keeps honouring it instead of decaying it away.)
+  for (let y=0;y<H;y++) for (let x=0;x<W;x++){
+    const i=idx(x,y);
+    temp[i]  = latitudeTemp(y, x);
+    moist[i] = Math.max(0,Math.min(255, (water[i]?230:70) + P.humidity));
+  }
+  for (let k=0;k<14;k++){ stepTemp(); stepMoist(); stepIce(); }
+  classifyBiomes();
+
+  // reset civilization state, then drop a handful of discrete starter colonies
+  // on fertile land. (No blanket stippling — that buried the map in oscillator
+  // noise. Distinct colonies grow into readable clusters.)
+  age.fill(0);
+  terr.fill(0); terrStr.fill(0);
+  gliders = [];
+  facPop.fill(0); facPrevPop.fill(0);
+  for (let f=1; f<=NFAC; f++) facVigor[f]=1.0;
+  nextFaction = 1;
+  seedColonies(P.colonies, P.lifeDensity);
+  countFactions();
+  // flood the initial territory so the political map exists from generation 0
+  for (let k=0;k<130;k++) stepInfluence();
+  draw();
+  updateStats();
+}
+
+/* Drop `count` starter colonies, grouped into a few clusters so rival factions
+   share a landmass and therefore share borders. Isolated colonies on separate
+   islands never contest territory; clustered ones go to war. */
+function seedColonies(count, density){
+  if (count<=0) return;
+  const perCluster = 3;
+  const clusters = Math.max(1, Math.round(count/perCluster));
+  let placed=0, guard=0;
+  for (let c=0; c<clusters && placed<count; c++){
+    // find a fertile cluster centre
+    let cx=-1, cy=-1, g2=0;
+    while (g2++<400){
+      const x=rnd(W), y=rnd(H), i=idx(x,y);
+      if (land[i] && !water[i] && !ice[i] && isFertile(i)){ cx=x; cy=y; break; }
+    }
+    if (cx<0) continue;
+    // drop several rival colonies clustered around the centre (same landmass)
+    let made=0, g3=0;
+    while (made<Math.min(perCluster, count-placed) && g3++<400){
+      const x = cx + rnd(46)-23, y = cy + rnd(46)-23;
+      if (x<2||y<2||x>=W-2||y>=H-2) continue;
+      const i=idx(x,y);
+      if (!land[i] || water[i] || ice[i] || !isFertile(i)) continue;
+      seedColony(x, y, density);
+      placed++; made++;
+    }
+  }
+  // place any leftover colonies anywhere fertile
+  while (placed<count && guard++<count*200){
+    const x=rnd(W), y=rnd(H), i=idx(x,y);
+    if (!land[i] || water[i] || ice[i] || !isFertile(i)) continue;
+    seedColony(x, y, density); placed++;
+  }
+}
+
+/* A colony = a small Conway soup stamped onto land, tagged with a faction.
+   `density` (0..1) controls how packed the soup is. `fac` forces a faction id
+   (used by glider landings); 0 = take the next faction in rotation. Used by
+   world-gen, the Colony god-tool, and glider beachheads. */
+function seedColony(cx, cy, density=0.5, fac=0, radius=7){
+  let f = fac;
+  if (!f){ f = nextFaction++; if (nextFaction>NFAC) nextFaction=1; }
+  const R=radius;
+  for (let dy=-R;dy<=R;dy++) for (let dx=-R;dx<=R;dx++){
+    if (dx*dx+dy*dy > R*R) continue;
+    const x=cx+dx, y=cy+dy;
+    if (x<1||y<1||x>=W-1||y>=H-1) continue;
+    const i=idx(x,y);
+    if (water[i]||ice[i]) continue;                 // not on open water/ice
+    if (rng()<density) life[i] = f;
+  }
+}
+
+/* =========================================================================
+   GLIDERS-AS-ARMIES — the canonical Conway way to move across the map. A
+   strong civilization periodically launches a glider toward distant land; it
+   flies (even over ocean, reaching new continents) and on landing founds a
+   colony of its faction — a beachhead that then projects influence and opens a
+   new front. Launch and landing are real Conway cells; the flight is a managed
+   overlay so it reliably reaches its target.
+   ========================================================================= */
+let gliders = [];                 // {x,y,vx,vy,fac,ttl}
+let gliderWaveTick = 0;
+const GLIDER_SPEED   = 0.9;       // cells advanced per generation
+const GLIDER_TTL     = 700;       // max flight length (generations)
+const GLIDER_WAVE    = 16;        // generations between launch waves
+const GLIDER_MAX     = 30;        // cap simultaneous gliders
+const GLIDER_MIN_POP = 40;        // a faction needs this many cells to launch
+
+// pick a living border cell of faction f to launch from (sampled, no full scan)
+function findLaunchSite(f){
+  for (let t=0;t<60;t++){
+    const x=rnd(W), y=rnd(H), i=idx(x,y);
+    if (life[i]===f) return {x,y};
+  }
+  return null;
+}
+// pick a target: prefer fertile land NOT owned by f (neutral frontier or enemy),
+// a good distance away, sampled cheaply.
+function findGliderTarget(sx,sy,f){
+  let best=null, bestScore=-1;
+  for (let t=0;t<70;t++){
+    const x=rnd(W), y=rnd(H), i=idx(x,y);
+    if (!land[i] || water[i] || ice[i] || !isFertile(i)) continue;
+    if (terr[i]===f) continue;                      // skip our own land
+    const dx=x-sx, dy=y-sy, d=Math.sqrt(dx*dx+dy*dy);
+    if (d<25) continue;                             // must be a real expedition
+    const enemy = terr[i]!==0 ? 1.4 : 1.0;          // bias toward attacking rivals
+    const score = enemy * (1 - Math.abs(d-120)/200);// favour ~mid-range targets
+    if (score>bestScore){ bestScore=score; best={x,y}; }
+  }
+  return best;
+}
+
+function launchGliderWave(){
+  for (let f=1; f<=NFAC; f++){
+    if (facPop[f] < GLIDER_MIN_POP) continue;
+    if (gliders.length >= GLIDER_MAX) break;
+    if (Math.random() > 0.5) continue;              // ~half the factions launch each wave
+    const src = findLaunchSite(f); if (!src) continue;
+    const tgt = findGliderTarget(src.x, src.y, f); if (!tgt) continue;
+    let dx=tgt.x-src.x, dy=tgt.y-src.y; const d=Math.sqrt(dx*dx+dy*dy)||1;
+    gliders.push({x:src.x, y:src.y, vx:dx/d, vy:dy/d, tx:tgt.x, ty:tgt.y, fac:f, ttl:GLIDER_TTL});
+  }
+}
+
+function stepGliders(){
+  gliderWaveTick++;
+  if (gliderWaveTick % GLIDER_WAVE === 0) launchGliderWave();
+  for (let k=gliders.length-1; k>=0; k--){
+    const g=gliders[k];
+    g.x += g.vx*GLIDER_SPEED; g.y += g.vy*GLIDER_SPEED; g.ttl--;
+    if (g.x<0) g.x+=W; else if (g.x>=W) g.x-=W;     // toroidal flight
+    if (g.y<0) g.y+=H; else if (g.y>=H) g.y-=H;
+    if (g.ttl<=0){ gliders.splice(k,1); continue; }
+    const ix=g.x|0, iy=g.y|0, i=iy*W+ix;
+    // the army flies the whole way to its target and lands when it arrives
+    // (so you watch it cross seas to a distant shore, not stop at the border).
+    const dxt=g.tx-ix, dyt=g.ty-iy;
+    const nearTarget = (dxt*dxt+dyt*dyt) <= 9;       // within ~3 cells of target
+    if (nearTarget){
+      // found the beachhead if it's viable land; otherwise just disband
+      if (land[i] && !water[i] && !ice[i] && isFertile(i))
+        seedColony(ix, iy, 0.55, g.fac, 5);
+      else {
+        // target spoiled — drop the colony on the nearest fertile land we can see
+        for (let s=0;s<12;s++){
+          const jx=ix+rnd(7)-3, jy=iy+rnd(7)-3;
+          if (jx<2||jy<2||jx>=W-2||jy>=H-2) continue;
+          const j=jx+jy*W;
+          if (land[j] && !water[j] && !ice[j] && isFertile(j)){ seedColony(jx,jy,0.55,g.fac,5); break; }
+        }
+      }
+      gliders.splice(k,1);
+    }
+  }
+}
+
+/* =========================================================================
+   CLIMATE — temperature & humidity are diffusion CAs (Conway-family: each
+   cell's next value is a function of its neighbourhood). A latitude gradient
+   plus a slow seasonal swing act as the temperature source; water cools and
+   humidifies. Biomes are then read off these fields. Ice is a threshold CA.
+   ========================================================================= */
+let season = 0;          // 0..2π, advances slowly -> summer/winter swing
+const SEASON_SPEED = 0.012;
+let seasonAmp = 55;      // how many temp-units the seasons swing the poles
+
+// Per-column warp of the latitude line, so the cold/hot bands (and therefore
+// the ice caps) are wavy and organic rather than ruler-straight stripes.
+// Rebuilt for each world in generateWorld() from a few summed sine waves.
+let latWarp = null;
+function buildLatWarp(){
+  latWarp = new Float32Array(Math.max(1,W));
+  const a1=8+rng()*10, a2=4+rng()*6, p1=rng()*6.28, p2=rng()*6.28,
+        f1=(1+rng()*2)*Math.PI*2/W, f2=(3+rng()*3)*Math.PI*2/W;
+  for (let x=0;x<W;x++){
+    latWarp[x] = Math.sin(x*f1+p1)*a1 + Math.sin(x*f2+p2)*a2; // ±~20 cells
+  }
+}
+
+// Base temperature at (x,y): cold poles, hot equator, with the latitude line
+// warped per-column so climate bands are wavy. + seasonal swing.
+function latitudeTemp(y, x){
+  let yy = y;
+  if (x!==undefined && latWarp) yy = y + latWarp[x];   // warp the band
+  const lat = Math.min(1, Math.abs(yy - H/2) / (H/2));  // 0 equator, 1 pole
+  const base = 235 - lat*lat*205;          // equator ~235, poles ~30
+  const swing = Math.sin(season) * seasonAmp * (0.3 + 0.7*lat); // poles swing most
+  return Math.max(0, Math.min(255, Math.round(base + swing + worldParams.climate)));
+}
+
+// Diffusion: relax each cell toward the average of its 4-neighbourhood, pulled
+// back toward its latitude source. Water is a strong cold/stable anchor.
+function stepTemp(){
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i=idx(x,y);
+      const src = latitudeTemp(y, x);      // warped latitude source
+      let s=temp[i], c=1;
+      if (x>0){ s+=temp[i-1]; c++; }      if (x<W-1){ s+=temp[i+1]; c++; }
+      if (y>0){ s+=temp[i-W]; c++; }      if (y<H-1){ s+=temp[i+W]; c++; }
+      let v = s/c;                         // neighbourhood average (diffusion)
+      v += (src - v) * 0.10;               // pull toward latitude source
+      if (ice[i])        v += (70  - v) * 0.12;   // ice stays cool (mild self-reinforce)
+      else if (water[i]) v += (120 - v) * 0.10;   // open sea moderates climate
+      tempNext[i] = Math.max(0, Math.min(255, Math.round(v)));
+    }
+  }
+  [temp,tempNext]=[tempNext,temp];
+}
+
+// Humidity diffuses similarly; seas are humidity sources, heat dries the air.
+function stepMoist(){
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i=idx(x,y);
+      let s=moist[i], c=1;
+      if (x>0){ s+=moist[i-1]; c++; }     if (x<W-1){ s+=moist[i+1]; c++; }
+      if (y>0){ s+=moist[i-W]; c++; }     if (y<H-1){ s+=moist[i+W]; c++; }
+      let v = s/c;
+      if (water[i]) v += (235 - v)*0.18;            // sea humidifies (its own cell)
+      else {
+        // land relaxes toward a mild baseline (so it doesn't run away to bone-dry
+        // everywhere); only genuine heat actively desiccates it.
+        v += (90 - v) * 0.03;                       // gentle pull to a temperate baseline
+        v -= Math.max(0,(temp[i]-150))*0.045;       // real heat dries land
+      }
+      if (forest[i]) v += 4;                        // forests hold moisture
+      moistNext[i] = Math.max(0, Math.min(255, Math.round(v)));
+    }
+  }
+  [moist,moistNext]=[moistNext,moist];
+}
+
+// ICE: cold water freezes into sea ice; very cold land grows glaciers. Modelled
+// as a CA so caps have organic edges instead of straight latitude stripes:
+//   • an iced cell stays frozen until it clearly warms (hysteresis -> recedes
+//     gradually with the seasons, doesn't flicker);
+//   • a cell freezes if it's very cold, OR moderately cold AND touching ice
+//     (the cap creeps outward along the cold front -> ragged, natural shape).
+function stepIce(){
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i=idx(x,y);
+      if (ice[i]){
+        iceNext[i] = temp[i] < 102 ? 1 : 0;     // melt when warmed past 102
+        continue;
+      }
+      const t = temp[i];
+      const coreThresh = water[i] ? 74 : 64;     // hard freeze (no ice needed)
+      if (t < coreThresh){ iceNext[i]=1; continue; }
+      // marginal cold: freeze only if an adjacent cell is already iced (spread)
+      const edgeThresh = water[i] ? 92 : 84;
+      if (t < edgeThresh){
+        let nIce=0;
+        if (x>0 && ice[i-1]) nIce++;
+        if (x<W-1 && ice[i+1]) nIce++;
+        if (y>0 && ice[i-W]) nIce++;
+        if (y<H-1 && ice[i+W]) nIce++;
+        iceNext[i] = nIce>0 ? 1 : 0;
+      } else {
+        iceNext[i] = 0;
+      }
+    }
+  }
+  [ice,iceNext]=[iceNext,ice];
+}
+
+// Classify each cell's biome from the climate fields. Cheap lookup, no sim.
+function classifyBiomes(){
+  for (let i=0;i<N;i++){
+    if (ice[i]){ biome[i] = B_ICE; continue; }       // sea ice or land glacier
+    if (!land[i]){ biome[i] = B_SEA; continue; }
+    if (water[i]){ biome[i] = B_SHALLOW; continue; } // flooded land
+    const t=temp[i], m=moist[i];
+    let b;
+    // forest (planted or grown) shades & holds moisture, so it reads as forest
+    // even on otherwise dry/sandy ground — a green oasis, never dead desert.
+    if (forest[i] && t>=70)  b = B_FOREST;
+    else if (t < 70)        b = B_SNOW;
+    else if (t < 110)       b = B_TUNDRA;
+    // desert only where it's both hot AND genuinely arid (was: any dry cell)
+    else if (m < 48 && t > 165) b = B_DESERT;
+    else if (m > 205)       b = B_SWAMP;
+    else if (m > 150)       b = B_FOREST;
+    else                    b = B_GRASS;
+    biome[i] = b;
+  }
+}
+
+// Fertility for life is now driven by biome: lush biomes support civilization,
+// desert/snow/ice do not. Returns true where life gets its survival bonus.
+function isFertile(i){
+  const b = biome[i];
+  return b===B_GRASS || b===B_FOREST || b===B_SWAMP;
+}
+
+// Biome quality drives how strongly a colony projects territorial influence:
+// a faction on rich land out-pushes a neighbour on poor land, so the border
+// flows toward worse terrain. (This is the "biome expansion" mechanism.)
+function biomeQuality(i){
+  switch (biome[i]){
+    case B_FOREST: case B_SWAMP: return 1.5;
+    case B_GRASS:  return 1.2;
+    case B_TUNDRA: return 0.7;
+    case B_DESERT: return 0.5;
+    case B_SNOW:   return 0.4;
+    default:       return 0.8;
+  }
+}
+
+/* ---- TERRITORY: competitive-diffusion CA (voter model) ----------------
+   Each living cell injects influence for its faction, scaled by biome quality.
+   On empty land the influence floods outward, losing TERR_DECAY per cell, and
+   competes: a cell is owned by whichever faction's flood is strongest here. The
+   border is the moving line where two factions' influence balance — it drifts
+   as colonies grow/shrink and as richer land out-pushes poorer. Inertia keeps
+   the line from flickering. Water/ice/sea can't be owned. */
+const _ti = new Float32Array(NFAC+1);    // per-faction influence (max) scratch
+const _tiT = new Int32Array(9);          // faction ids touched this cell
+const TERR_DECAY   = 1.5;   // influence lost per cell — low, so territories reach
+                            // far enough to actually meet and contest (≈170 cells)
+const TERR_SOURCE  = 80;    // base influence a living cell injects
+const TERR_INERTIA = 1.04;  // current owner's edge needed to be displaced
+function stepInfluence(){
+  for (let y=0;y<H;y++){
+    const yUp=(y>0?y-1:H-1)*W, yDn=(y<H-1?y+1:0)*W, yMid=y*W;
+    for (let x=0;x<W;x++){
+      const i=yMid+x;
+      if (!land[i] || water[i] || ice[i]){ terrNext[i]=0; terrStrNext[i]=0; continue; }
+
+      if (life[i]>0){
+        // occupied cell: its colony owns it. Influence injected scales with land
+        // quality (biome expansion) AND the faction's vigor (population/momentum),
+        // so growing empires on rich land push their borders outward over time.
+        const f=life[i];
+        terrNext[i]   = f;
+        terrStrNext[i]= Math.min(255, terrStr[i]*0.55 + TERR_SOURCE*biomeQuality(i)*facVigor[f]);
+        continue;
+      }
+
+      // empty land: competitive flood from neighbours (max strength per faction)
+      const xL=x>0?x-1:W-1, xR=x<W-1?x+1:0;
+      const ns=[yUp+xL,yUp+x,yUp+xR, yMid+xL,yMid+xR, yDn+xL,yDn+x,yDn+xR];
+      const fc=_ti; let nt=0;
+      for (let k=0;k<8;k++){
+        const j=ns[k], f=terr[j];
+        if (!f) continue;
+        const w=terrStr[j];
+        if (fc[f]===0){ _tiT[nt++]=f; fc[f]=w; }
+        else if (w>fc[f]) fc[f]=w;
+      }
+      // choose strongest faction (candidate strength = flood value - decay),
+      // with inertia for whoever currently holds the cell.
+      const cur=terr[i];
+      let best=0, bestV=0, curV=-1;
+      for (let k=0;k<nt;k++){
+        const f=_tiT[k], c=fc[f]-TERR_DECAY;
+        if (f===cur) curV=c;
+        if (c>bestV){ bestV=c; best=f; }
+        fc[f]=0;                                  // clear scratch
+      }
+      if (cur && curV>0 && best!==cur && bestV < curV*TERR_INERTIA){ best=cur; bestV=curV; }
+
+      if (bestV<=0){ terrNext[i]=0; terrStrNext[i]=0; }
+      else { terrNext[i]=best; terrStrNext[i]=bestV; }
+    }
+  }
+  [terr,terrNext]=[terrNext,terr];
+  [terrStr,terrStrNext]=[terrStrNext,terrStr];
+}
+
+/* =========================================================================
+   STEP — advance every CA layer one generation. Order matters: climate and
+   the substrate (fire, water, ice) update first, biomes are reclassified,
+   then Conway life evolves on the resulting world.
+   ========================================================================= */
+let generation = 0;
+let climateTick = 0;
+
+function step(){
+  // climate evolves slower than life (it's a background field) — every 2 gens
+  climateTick++;
+  if (climateTick % 2 === 0){
+    season += SEASON_SPEED;
+    stepTemp();
+    stepMoist();
+    stepIce();
+  }
+  stepFire();
+  stepWater();
+  stepForest();
+  classifyBiomes();
+  countFactions();          // refresh faction populations for the leaderboard
+  stepLife();   // <- the literal Conway B3/S23 rule
+  stepGliders();            // armies fly out and found beachhead colonies
+  updateFactionVigor();     // size/momentum -> how hard each faction pushes
+  stepInfluence();          // territory flows from the updated colonies
+  generation++;
+}
+
+/* ---- LIFE: Conway's Game of Life (B3/S23), kept perpetually alive -------
+   Birth/death are pure Conway B3/S23. The problem with plain B3/S23 in a
+   worldbox is that colonies quickly freeze into still-lifes (unchanging
+   blocks) — which reads as "dead". To keep the world feeling alive we add a
+   small STOCHASTIC churn on fertile land: a tiny chance each generation that a
+   cell spontaneously dies, and that an empty fertile cell next to life sparks.
+   This perturbation breaks up still-lifes so colonies endlessly crawl, ripple
+   and reform — still a per-cell neighbourhood rule, just non-deterministic.
+   Faction id is carried along by a simple majority neighbour vote. */
+const _fc = new Float32Array(NFAC+1);    // reusable faction vote
+const _touched = new Int32Array(9);      // faction ids seen in the neighbourhood
+const CHURN_DEATH = 0.010;  // chance a stable cell spontaneously dies (fertile)
+const CHURN_BIRTH = 0.090;  // chance an empty fertile cell sparks beside life
+function stepLife(){
+  const fc = _fc;
+  for (let y=0;y<H;y++){
+    const yUp = (y>0?y-1:H-1)*W, yDn = (y<H-1?y+1:0)*W, yMid = y*W;
+    for (let x=0;x<W;x++){
+      const i = yMid + x;
+      // drowned / frozen / burning land is lethal to life
+      if (water[i] || fire[i] || ice[i]) { lifeNext[i]=0; ageNext[i]=0; continue; }
+
+      const xL = x>0?x-1:W-1, xR = x<W-1?x+1:0;   // toroidal x neighbours
+      let n=0, nt=0;                                // count, #distinct factions
+      // tally neighbours by faction; track only factions we touch so we never
+      // fill/scan the whole NFAC table (big win on a full map).
+      let best=0, bestV=0;
+      const ns = [yUp+xL,yUp+x,yUp+xR, yMid+xL,yMid+xR, yDn+xL,yDn+x,yDn+xR];
+      for (let k=0;k<8;k++){
+        const v = life[ns[k]];
+        if (!v) continue;
+        n++;
+        const nv = (fc[v] += 1);
+        if (nv===1) _touched[nt++]=v;            // first time we see v
+        if (nv>bestV){ bestV=nv; best=v; }
+      }
+
+      // fast path: a cell with no living neighbours is always dead next gen.
+      if (n===0){ lifeNext[i]=0; ageNext[i]=0; continue; }
+
+      const alive = life[i] > 0;
+      // fertility from biome (grass/forest/swamp support life; desert/tundra/snow don't)
+      const fertile = isFertile(i);
+      const harsh = biome[i]===B_DESERT || biome[i]===B_SNOW || biome[i]===B_TUNDRA;
+
+      let live;
+      if (alive){
+        // S23, plus S4 on fertile land so colonies are robust enough to persist.
+        // The churn-death below keeps that from freezing into static blocks.
+        live = (n===2 || n===3) || (fertile && n===4);
+        if (live && harsh && Math.random()<0.14) live=false;          // harsh starvation
+        else if (live && fertile && Math.random()<CHURN_DEATH) live=false; // churn
+      } else {
+        live = (n===3);                                   // pure Conway birth B3
+        // churn birth: an empty fertile cell that's one neighbour short of the
+        // B3 rule (n===2) often sparks anyway, feeding the colony fresh material
+        // so it grows and never settles into a frozen still-life.
+        if (!live && fertile && n===2 && Math.random()<CHURN_BIRTH) live=true;
+      }
+
+      if (!live){
+        lifeNext[i]=0; ageNext[i]=0;
+        for (let k=0;k<nt;k++) fc[_touched[k]]=0;   // clear before skipping
+        continue;
+      }
+
+      if (alive){
+        // a surviving cell simply keeps its own faction (no conquest)
+        lifeNext[i] = life[i];
+        ageNext[i] = age[i] < 255 ? age[i]+1 : 255;
+      } else {
+        // newborn inherits the dominant neighbouring faction (majority vote)
+        lifeNext[i] = best || 1;
+        ageNext[i] = 0;
+      }
+
+      // clear only the faction slots we touched (avoids fill() over all NFAC)
+      for (let k=0;k<nt;k++) fc[_touched[k]]=0;
+    }
+  }
+  [life,lifeNext]=[lifeNext,life];
+  [age,ageNext]=[ageNext,age];
+}
+
+/* ---- FIRE: spreading Conway-family CA -------------------------------- */
+/* Fire is born where a flammable cell (forest or life) is adjacent to fire,
+   survives a few ticks, then dies (burns out). Burned forest is consumed.
+   Water never burns and stops the spread — coasts are firebreaks. */
+function stepFire(){
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i = idx(x,y);
+      if (water[i]) { fireNext[i]=0; continue; }
+      let burning = fire[i];
+      if (burning>0){
+        fireNext[i] = burning-1;            // burn down
+        if (burning-1===0){ forest[i]=0; }  // forest consumed when fire dies
+        continue;
+      }
+      // not currently burning: catch fire if flammable & a neighbour burns
+      const flammable = forest[i] || life[i];
+      if (!flammable){ fireNext[i]=0; continue; }
+      let nf=0;
+      for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+        if(!dx&&!dy) continue;
+        const nx=x+dx, ny=y+dy;
+        if (nx<0||ny<0||nx>=W||ny>=H) continue;
+        if (fire[idx(nx,ny)]>0) nf++;
+      }
+      // damp/cold cells resist ignition; dry hot ones catch easily
+      const dryness = (temp[i]/255)*0.6 + (1-moist[i]/255)*0.6; // ~0..1.2
+      const pIgnite = Math.max(0.08, Math.min(0.92, 0.35+dryness*0.5));
+      fireNext[i] = nf>0 && Math.random()<pIgnite ? 4 : 0;  // 4-tick burn
+    }
+  }
+  [fire,fireNext]=[fireNext,fire];
+  // life on a freshly-ignited cell is destroyed
+  for (let i=0;i<N;i++) if (fire[i]>0) life[i]=0;
+}
+
+/* ---- WATER: Conway-variant flood CA ---------------------------------- */
+/* Water persists on low terrain (sea floor) and seeps onto land cells that
+   are mostly surrounded by water (coastal erosion / flooding), while land
+   well away from water stays dry. A totalistic rule, Conway-family. */
+function stepWater(){
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i = idx(x,y);
+      if (!land[i]){ waterNext[i]=1; continue; }   // sea floor is always wet
+      let nw=0;
+      for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+        if(!dx&&!dy) continue;
+        const nx=x+dx, ny=y+dy;
+        if (nx<0||ny<0||nx>=W||ny>=H) continue;
+        if (water[idx(nx,ny)]) nw++;
+      }
+      // land cell floods if surrounded by >=5 water; drains if <=2
+      if (water[i]) waterNext[i] = nw>=3 ? 1 : 0;
+      else          waterNext[i] = nw>=6 ? 1 : 0;
+    }
+  }
+  [water,waterNext]=[waterNext,water];
+}
+
+/* ---- FOREST: slow birth/survival CA on land -------------------------- */
+/* Forest is a Conway-family growth automaton: a forest cell survives with
+   1..4 forest neighbours; a bare land cell grows forest with exactly 3
+   forest neighbours (occasionally) — vegetation spreads but not explosively.
+   Water and fire clear it. Life lightly grazes mature forest. */
+let forestTick=0;
+function stepForest(){
+  forestTick++;
+  if (forestTick % 3 !== 0) return;   // forest grows 3x slower than life
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i = idx(x,y);
+      if (water[i] || fire[i] || !land[i]){ forestNext[i]=0; continue; }
+      let nf=0;
+      for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
+        if(!dx&&!dy) continue;
+        const nx=x+dx, ny=y+dy;
+        if (nx<0||ny<0||nx>=W||ny>=H) continue;
+        if (forest[idx(nx,ny)]) nf++;
+      }
+      if (forest[i]){
+        // grazed away under heavy life pressure; otherwise hardy — survives even
+        // alone (so a planted oasis persists on sand), dies only if overcrowded.
+        if (life[i] && Math.random()<0.06) forestNext[i]=0;
+        else forestNext[i] = (nf<=6) ? 1 : 0;
+      } else {
+        // spreads onto neighbouring land with ~3 forest neighbours
+        forestNext[i] = (nf===3 && Math.random()<0.5) ? 1 : 0;
+      }
+    }
+  }
+  [forest,forestNext]=[forestNext,forest];
+}
+
+/* =========================================================================
+   RENDERING — composite the CA layers into one image. Drawn bottom-up:
+   deep sea, shallow water, land, forest, fire, then living colonies on top.
+   ========================================================================= */
+let imgData = null;     // ImageData blitted to canvas
+let pix = null;         // Uint32 view of imgData (one write per pixel)
+let dither = null;      // per-cell deterministic brightness jitter (-6..+6)
+let cap = (v) => v<0?0:v>255?255:v|0;
+
+function ensureImg(){
+  if (!imgData || imgData.width!==W || imgData.height!==H){
+    imgData = ctx.createImageData(W, H);
+    pix = new Uint32Array(imgData.data.buffer);
+    // stable per-cell jitter so flat biomes get subtle texture (not random noise
+    // each frame, which would shimmer everywhere — only water shimmers).
+    dither = new Int8Array(N);
+    for (let i=0;i<N;i++){
+      let h = (i*2654435761) >>> 0;        // cheap integer hash
+      dither[i] = ((h & 15) - 7);          // -7..+8
+    }
+  }
+}
+
+// pack r,g,b -> little-endian 0xAABBGGRR (canvas byte order is RGBA)
+function rgba(r,g,b){ return 0xff000000 | (cap(b)<<16) | (cap(g)<<8) | cap(r); }
+
+let drawFrame = 0;
+function draw(){
+  ensureImg();
+  drawFrame++;
+  const shimmer = Math.sin(drawFrame*0.18);    // global water shimmer phase
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const i = y*W + x;
+      let r,g,b;
+      if (fire[i]>0){
+        // fire: hot core + per-cell per-frame flicker -> living flame
+        const t = fire[i];
+        const flick = ((i*97 + drawFrame*53) & 31) - 12;
+        r=255; g=110+t*32+flick; b=24+t*10;
+      } else if (life[i]>0){
+        const c = FACTIONS[(life[i]-1)%NFAC];
+        const dj = dither[i]*0.5;
+        r=c[0]+dj; g=c[1]+dj; b=c[2]+dj;
+      } else {
+        const bm = biome[i];
+        const col = BIOME_COL[bm] || BIOME_COL[B_SEA];
+        r=col[0]; g=col[1]; b=col[2];
+        if (bm===B_SEA || bm===B_SHALLOW){
+          // animated water: gentle shimmer + a depth feel from a slow gradient
+          const s = shimmer * (bm===B_SHALLOW?7:4);
+          const ds = dither[i]*0.4;
+          r+=s+ds; g+=s+ds; b+=s*1.4+ds;
+        } else if (bm===B_ICE || bm===B_SNOW){
+          // ice/snow: bright with a faint cool sparkle
+          const sp = ((i*131 + drawFrame*17)&31)===0 ? 22 : 0;
+          r+=dither[i]*0.6+sp; g+=dither[i]*0.6+sp; b+=dither[i]*0.6+sp;
+        } else {
+          // land: temperature tint (warm=redder, cool=bluer) + relief shading.
+          // coastal cells (touching sea) are darkened to read as a shoreline.
+          const warm = (temp[i]-128)/255;
+          r += warm*26 + dither[i]; g += dither[i]; b += -warm*26 + dither[i];
+          // cheap relief: compare to the cell above; brighten south-facing slopes
+          if (y>0){
+            const up=i-W;
+            if (!land[up]) { r-=22; g-=22; b-=18; }          // coast shadow vs sea
+            else if (forest[up] && !forest[i]) { r+=6; g+=8; }
+          }
+          // POLITICAL MAP: tint owned land by its faction; stronger hold = more
+          // saturated, and the border (a sharp strength drop) reads as a coastline
+          // of colour. Empty unclaimed land keeps its natural biome colour.
+          const f = terr[i];
+          if (f){
+            const fcol = FACTIONS[(f-1)%NFAC];
+            const k = 0.10 + Math.min(0.28, terrStr[i]/255*0.30);  // 0.10..0.38
+            r += (fcol[0]-r)*k; g += (fcol[1]-g)*k; b += (fcol[2]-b)*k;
+          }
+        }
+      }
+      pix[i] = rgba(r,g,b);
+    }
+  }
+  drawGliders();             // bright flying armies + trails, on top of everything
+  // scale the WxH image up to the canvas — nearest-neighbour, no blur
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(scaleCanvas(), 0, 0, W, H, 0, 0, cv.width, cv.height);
+}
+
+// draw each glider as a bright faction-tinted head with a short fading trail
+function drawGliders(){
+  for (const g of gliders){
+    const fc = FACTIONS[(g.fac-1)%NFAC];
+    for (let t=0; t<5; t++){
+      const px=(g.x - g.vx*t)|0, py=(g.y - g.vy*t)|0;
+      if (px<0||py<0||px>=W||py>=H) continue;
+      const b = t===0 ? 1 : 0.55/t;               // head brightest, trail fades
+      const r = fc[0] + (255-fc[0])*b;
+      const gg= fc[1] + (255-fc[1])*b;
+      const bb= fc[2] + (255-fc[2])*b;
+      pix[py*W+px] = rgba(r,gg,bb);
+    }
+  }
+}
+// putImageData ignores transform, so blit through a small backing canvas
+let _back=null, _bctx=null;
+function scaleCanvas(){
+  if(!_back){ _back=document.createElement('canvas'); _bctx=_back.getContext('2d'); }
+  if(_back.width!==W || _back.height!==H){ _back.width=W; _back.height=H; }
+  _bctx.putImageData(imgData,0,0);
+  return _back;
+}
+
+/* =========================================================================
+   TOOLS — every god power writes into a CA grid. Pure Conway underneath.
+   ========================================================================= */
+const TOOLS = [
+  { id:'life',    name:'Life',    icon:'🦠', hint:'paint living cells (a Conway soup)' },
+  { id:'colony',  name:'Colony',  icon:'🏙️', hint:'drop a new faction colony' },
+  { id:'land',    name:'Raise',   icon:'⛰️', hint:'raise land from the sea' },
+  { id:'water',   name:'Water',   icon:'🌊', hint:'flood with water' },
+  { id:'forest',  name:'Forest',  icon:'🌲', hint:'plant forest on land' },
+  { id:'fire',    name:'Fire',    icon:'🔥', hint:'ignite — fire spreads & burns' },
+  { id:'meteor',  name:'Meteor',  icon:'☄️', hint:'impact: crater + firestorm' },
+  { id:'erase',   name:'Erase',   icon:'🩹', hint:'wipe life, fire & forest' },
+];
+let currentTool = 'life';
+
+function applyTool(cx, cy, brush){
+  const r = brush;
+  for (let dy=-r;dy<=r;dy++){
+    for (let dx=-r;dx<=r;dx++){
+      if (dx*dx+dy*dy > r*r) continue;
+      const x=cx+dx, y=cy+dy;
+      if (x<0||y<0||x>=W||y>=H) continue;
+      const i=idx(x,y);
+      switch(currentTool){
+        case 'life':
+          if (!water[i] && Math.random()<0.6) life[i]=life[i]||1;
+          break;
+        case 'land':
+          land[i]=1; water[i]=0;
+          break;
+        case 'water':
+          water[i]=1; life[i]=0; fire[i]=0; forest[i]=0;
+          break;
+        case 'forest':
+          if (land[i] && !water[i]) forest[i]=1;
+          break;
+        case 'fire':
+          if (!water[i] && (forest[i]||life[i]||land[i])) fire[i]=4;
+          break;
+        case 'erase':
+          life[i]=0; fire[i]=0; forest[i]=0;
+          break;
+        case 'meteor':
+          // crater: clears everything, raises ring debris, ignites edge
+          land[i]=1; water[i]=0; forest[i]=0; life[i]=0;
+          if (dx*dx+dy*dy > (r-2)*(r-2)) fire[i]=4; else fire[i]=0;
+          break;
+      }
+    }
+  }
+  if (currentTool==='colony'){ seedColony(cx,cy); }
+  if (!running){ classifyBiomes(); draw(); updateStats(); }
+}
+
+/* =========================================================================
+   MAIN LOOP
+   ========================================================================= */
+let running = true;
+let speed = 18;               // generations per second
+let acc = 0, last = performance.now();
+
+function frame(now){
+  const dt = (now-last)/1000; last=now;
+  if (running){
+    acc += dt;
+    const interval = 1/speed;
+    let steps=0;
+    while (acc >= interval && steps<4){ step(); acc-=interval; steps++; }
+    if (steps>0){ draw(); updateStats(); }
+    else draw();                // still redraw for water shimmer / fire flicker
+  } else {
+    draw();                     // keep the world animating (shimmer) while paused
+  }
+  requestAnimationFrame(frame);
+}
+
+/* =========================================================================
+   STATS — count populations & estimate distinct civilizations.
+   ========================================================================= */
+const SEASON_NAMES=['🌱 Spring','☀️ Summer','🍂 Autumn','❄️ Winter'];
+function seasonName(){
+  // map sin-phase: peak warm = summer, trough = winter
+  const s=((season%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  const q=Math.floor(((s)/(Math.PI/2)))%4;
+  return SEASON_NAMES[q];
+}
+function updateStats(){
+  countFactions();   // keep facPop fresh even when paused / after painting
+  let pop=0, waterC=0, fireC=0, landC=0, iceC=0, tSum=0, mSum=0;
+  for (let i=0;i<N;i++){
+    if (life[i]) pop++;
+    if (water[i]) waterC++;
+    if (fire[i]>0) fireC++;
+    if (land[i]) landC++;
+    if (ice[i]) iceC++;
+    tSum+=temp[i]; mSum+=moist[i];
+  }
+  let civs=0; for (let f=1;f<=NFAC;f++) if (facPop[f]>4) civs++;
+  const avgT=Math.round(tSum/N), avgM=Math.round(mSum/N);
+  const tempC=Math.round((avgT/255)*60-15);   // map 0..255 -> ~ -15..45 °C feel
+  document.getElementById('stats').innerHTML =
+    `Generation <b>${generation}</b> · ${seasonName()}<br/>`+
+    `Living cells <b>${pop}</b> · Civs <b>${civs}</b><br/>`+
+    `Avg temp <b>${tempC}°</b> · Humidity <b>${Math.round(avgM/255*100)}%</b><br/>`+
+    `Ice <b>${iceC}</b> · Fire <b>${fireC}</b><br/>`+
+    `Land <b>${Math.round(landC/N*100)}%</b> · Sea <b>${Math.round(waterC/N*100)}%</b>`;
+
+  // ---- faction leaderboard: bar per civilization, sorted by population -----
+  const rows=[];
+  for (let f=1; f<=NFAC; f++) if (facPop[f]>0) rows.push(f);
+  rows.sort((a,b)=>facPop[b]-facPop[a]);
+  const maxP = rows.length ? facPop[rows[0]] : 1;
+  let html='';
+  if (!rows.length){
+    html='<div class="hint">No civilizations — paint life or drop a colony.</div>';
+  } else {
+    for (const f of rows){
+      const c=FACTIONS[(f-1)%NFAC];
+      const col=`rgb(${c[0]},${c[1]},${c[2]})`;
+      const w=Math.max(3, Math.round(facPop[f]/maxP*100));
+      const trend = facPop[f]>facPrevPop[f]+1 ? '▲' : facPop[f]<facPrevPop[f]-1 ? '▼' : '·';
+      const trendCol = trend==='▲' ? '#7be0ad' : trend==='▼' ? '#e06c75' : '#8b98ac';
+      html +=
+        `<div class="fac">`+
+          `<span class="facdot" style="background:${col}"></span>`+
+          `<span class="facname">${facName[f]}</span>`+
+          `<span class="facbarwrap"><span class="facbar" style="width:${w}%;background:${col}"></span></span>`+
+          `<span class="facpop">${facPop[f]}</span>`+
+          `<span class="factrend" style="color:${trendCol}">${trend}</span>`+
+        `</div>`;
+    }
+  }
+  const elFac=document.getElementById('factions');
+  if (elFac) elFac.innerHTML=html;
+}
+
+/* =========================================================================
+   UI WIRING
+   ========================================================================= */
+function buildTools(){
+  const wrap=document.getElementById('tools');
+  wrap.innerHTML='';
+  TOOLS.forEach((t,i)=>{
+    const el=document.createElement('div');
+    el.className='tool'+(t.id===currentTool?' active':'');
+    el.title=t.hint;
+    el.dataset.id=t.id;
+    el.innerHTML=`<span class="ic">${t.icon}</span><span>${t.name}</span>`;
+    el.onclick=()=>selectTool(t.id);
+    wrap.appendChild(el);
+  });
+}
+function selectTool(id){
+  currentTool=id;
+  document.querySelectorAll('.tool').forEach(e=>e.classList.toggle('active', e.dataset.id===id));
+}
+function rgb(a){ return `rgb(${a[0]},${a[1]},${a[2]})`; }
+function buildLegend(){
+  const items=[
+    [rgb(BIOME_COL[B_SEA]),'Sea'],       [rgb(BIOME_COL[B_ICE]),'Ice'],
+    [rgb(BIOME_COL[B_SNOW]),'Snow'],     [rgb(BIOME_COL[B_TUNDRA]),'Tundra'],
+    [rgb(BIOME_COL[B_DESERT]),'Desert'], [rgb(BIOME_COL[B_GRASS]),'Grassland'],
+    [rgb(BIOME_COL[B_FOREST]),'Forest'], [rgb(BIOME_COL[B_SWAMP]),'Swamp'],
+    ['#ff7820','Fire'],                  ['#4ea8de','Civilization'],
+    ['#4ea8de88','Territory'],           ['#ffffff','Army (glider)'],
+  ];
+  document.getElementById('legend').innerHTML = items.map(
+    ([c,n])=>`<div class="li"><span class="sw" style="background:${c}"></span>${n}</div>`
+  ).join('');
+}
+
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1400);
+}
+
+function setRunning(r){
+  running=r;
+  const b=document.getElementById('playBtn');
+  b.textContent = r ? '⏸ Pause' : '▶ Play';
+  b.classList.toggle('paused', !r);
+}
+
+/* ---- canvas sizing & pointer ----------------------------------------- */
+/* The canvas fills the whole stage. The world grid (W×H) is derived from the
+   stage size divided by CELL, so the simulation resolution follows the window
+   and the map always fills the screen edge-to-edge. The low-res image is then
+   blitted up with nearest-neighbour scaling (no blur). */
+let resizeTimer=null;
+function resize(){
+  const stage=document.getElementById('stage');
+  const availW=stage.clientWidth, availH=stage.clientHeight;
+  if (availW<2||availH<2) return;
+
+  // canvas backing store == screen pixels (crisp 1:1 with display)
+  cv.width=availW; cv.height=availH;
+
+  // desired grid size from CELL; reallocate + regenerate only if it changed
+  const newW=Math.max(40, Math.round(availW/CELL));
+  const newH=Math.max(40, Math.round(availH/CELL));
+  if (newW!==W || newH!==H){
+    W=newW; H=newH;
+    allocGrids();
+    imgData=null;
+    generation=0;
+    generateWorld();   // generateWorld() calls draw()
+  } else {
+    draw();
+  }
+}
+window.addEventListener('resize', ()=>{
+  clearTimeout(resizeTimer);
+  resizeTimer=setTimeout(resize, 150);   // debounce: regen is expensive
+});
+
+let painting=false;
+function canvasToCell(e){
+  const rect=cv.getBoundingClientRect();
+  const x=Math.floor((e.clientX-rect.left)/rect.width*W);
+  const y=Math.floor((e.clientY-rect.top)/rect.height*H);
+  return [x,y];
+}
+cv.addEventListener('pointerdown', e=>{
+  painting=true; cv.setPointerCapture(e.pointerId);
+  const [x,y]=canvasToCell(e); applyTool(x,y,+brush.value);
+});
+cv.addEventListener('pointermove', e=>{
+  const [x,y]=canvasToCell(e);
+  document.getElementById('overlay-info').textContent =
+    `(${x}, ${y})  ·  tool: ${TOOLS.find(t=>t.id===currentTool).name}  ·  brush ${brush.value}`;
+  if (painting) applyTool(x,y,+brush.value);
+});
+cv.addEventListener('pointerup', ()=>painting=false);
+cv.addEventListener('pointerleave', ()=>{ document.getElementById('overlay-info').textContent=''; });
+
+/* ---- controls -------------------------------------------------------- */
+const brush=document.getElementById('brush');
+brush.oninput=()=>document.getElementById('brushVal').textContent=brush.value;
+const speedEl=document.getElementById('speed');
+speedEl.oninput=()=>{ speed=+speedEl.value; document.getElementById('speedVal').textContent=speed; };
+const resEl=document.getElementById('res');
+resEl.oninput=()=>{
+  CELL=+resEl.value;
+  document.getElementById('resVal').textContent=CELL+'px';
+  resize();   // rebuilds the grid at the new resolution
+};
+
+document.getElementById('playBtn').onclick=()=>setRunning(!running);
+document.getElementById('stepBtn').onclick=()=>{ step(); draw(); updateStats(); };
+document.getElementById('clearBtn').onclick=()=>{ life.fill(0); fire.fill(0); draw(); updateStats(); toast('🧹 Life cleared'); };
+
+/* ---- world-generation controls --------------------------------------- */
+// links each slider/input to its worldParams field + a live label formatter.
+const GEN = [
+  ['p_sea',     'seaLevel',    v=>v/100,  v=>Math.round(v*100)],
+  ['p_smooth',  'landSmooth',  v=>v,      v=>v],
+  ['p_climate', 'climate',     v=>v,      v=>(v>0?'+':'')+v],
+  ['p_humid',   'humidity',    v=>v,      v=>(v>0?'+':'')+v],
+  ['p_forest',  'forestDens',  v=>v/100,  v=>v+'%'],
+  ['p_col',     'colonies',    v=>v,      v=>v],
+];
+function syncGenUI(){      // worldParams -> sliders & labels
+  for (const [id,key,toParam] of GEN){
+    const el=document.getElementById(id);
+    // invert toParam to set slider from the stored param
+    let raw;
+    if (key==='seaLevel') raw=Math.round(worldParams[key]*100);
+    else if (key==='forestDens') raw=Math.round(worldParams[key]*100);
+    else raw=worldParams[key];
+    el.value=raw;
+    const lblFn=GEN.find(g=>g[0]===id)[3];
+    document.getElementById(id+'V').textContent=lblFn(raw);
+  }
+  document.getElementById('p_seed').value=worldParams.seed;
+}
+for (const [id,key,toParam,toLabel] of GEN){
+  const el=document.getElementById(id);
+  el.oninput=()=>{
+    worldParams[key]=toParam(+el.value);
+    document.getElementById(id+'V').textContent=toLabel(+el.value);
+  };
+}
+document.getElementById('p_seed').oninput=e=>{ worldParams.seed=+e.target.value||0; };
+
+function doGenerate(msg){ generation=0; generateWorld(); toast(msg||'🌐 A new world is born'); }
+document.getElementById('genBtn').onclick=()=>doGenerate();
+document.getElementById('randBtn').onclick=()=>{
+  worldParams.seaLevel   = 0.34 + Math.random()*0.24;
+  worldParams.landSmooth = 4 + Math.floor(Math.random()*10);
+  worldParams.climate    = Math.round((Math.random()*2-1)*55);
+  worldParams.humidity   = Math.round((Math.random()*2-1)*70);
+  worldParams.forestDens = Math.random()*0.5;
+  worldParams.colonies   = 2 + Math.floor(Math.random()*18);
+  worldParams.seed       = Math.floor(Math.random()*1e6);
+  syncGenUI();
+  doGenerate('🎲 Random world');
+};
+
+/* preset worlds — named starting conditions */
+const PRESETS = [
+  ['🌍 Continents', {seaLevel:0.46, landSmooth:9, climate:0,   humidity:0,   forestDens:0.20, colonies:7}],
+  ['🏝️ Archipelago',{seaLevel:0.36, landSmooth:5, climate:8,   humidity:30,  forestDens:0.25, colonies:10}],
+  ['🏜️ Desert',     {seaLevel:0.50, landSmooth:8, climate:45,  humidity:-65, forestDens:0.03, colonies:5}],
+  ['❄️ Ice Age',    {seaLevel:0.48, landSmooth:8, climate:-50, humidity:10,  forestDens:0.10, colonies:5}],
+  ['🌴 Jungle',     {seaLevel:0.50, landSmooth:9, climate:30,  humidity:70,  forestDens:0.45, colonies:8}],
+  ['🌐 Pangaea',    {seaLevel:0.58, landSmooth:14,climate:0,   humidity:0,   forestDens:0.20, colonies:9}],
+];
+function buildPresets(){
+  const wrap=document.getElementById('presets');
+  wrap.innerHTML='';
+  PRESETS.forEach(([name,cfg])=>{
+    const el=document.createElement('div');
+    el.className='preset'; el.textContent=name;
+    el.onclick=()=>{
+      Object.assign(worldParams, cfg);
+      worldParams.seed=0;               // fresh each click
+      syncGenUI();
+      doGenerate(name);
+    };
+    wrap.appendChild(el);
+  });
+}
+
+window.addEventListener('keydown', e=>{
+  if (e.target.tagName==='INPUT') return;
+  switch(e.key){
+    case ' ': e.preventDefault(); setRunning(!running); break;
+    case 's': case 'S': step(); draw(); updateStats(); break;
+    case 'c': case 'C': life.fill(0); fire.fill(0); draw(); updateStats(); toast('🧹 Life cleared'); break;
+    case 'n': case 'N': generation=0; generateWorld(); toast('🌐 A new world is born'); break;
+    case '[': brush.value=Math.max(1,+brush.value-1); brush.oninput(); break;
+    case ']': brush.value=Math.min(40,+brush.value+1); brush.oninput(); break;
+    default:
+      if (/[1-9]/.test(e.key)){ const t=TOOLS[+e.key-1]; if(t) selectTool(t.id); }
+  }
+});
+
+/* ---- boot ------------------------------------------------------------ */
+buildTools();
+buildLegend();
+buildPresets();
+syncGenUI();
+resize();          // sizes the grid to the screen and generates the world
+setRunning(true);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>

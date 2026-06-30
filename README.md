@@ -16,6 +16,27 @@ Python の標準 GUI ライブラリ `tkinter` だけで作った、ライフゲ
 プレイヤーが操作するゲームというより、初期状態を決めると
 あとは自動的に「進化」していく様子を眺めて楽しむシミュレーションです。
 
+<<<<<<< HEAD
+## Civilizations & territory
+
+Living cells carry a **faction** identity (birth/death stay pure Conway B3/S23,
+with a small stochastic churn on fertile land so colonies never freeze into
+still-lifes). On top of the living cells sit two more Conway-family systems that
+make borders *move*:
+
+- **Territory** — a competitive-diffusion CA (voter model). Each colony radiates
+  influence for its faction; it floods across the land and competes, so the
+  border is the moving line where two factions' influence balance.
+- **Biome expansion** — influence scales with land quality, so a faction on rich
+  land out-pushes a neighbour on poor land and the front flows toward worse terrain.
+- **Vigor** — influence also scales with a faction's size and momentum, so booming
+  empires advance and declining ones retreat as their populations rise and fall.
+- **Gliders-as-armies** — a strong civilization periodically launches a glider that
+  flies across the map (even over ocean) and founds a beachhead colony on landing,
+  opening new fronts far from home. The canonical Conway way to move.
+
+A live leaderboard tracks each civilization's population and trend.
+=======
 ---
 
 ## 必要なもの
@@ -26,6 +47,7 @@ Python の標準 GUI ライブラリ `tkinter` だけで作った、ライフゲ
   - Linux で入っていない場合は `sudo apt install python3-tk` などで導入できます。
 
 外部パッケージのインストールは不要です。
+>>>>>>> 83ba47d1fb49f5f6eb3b3a5b35f0d02c6b16e737
 
 ---
 
