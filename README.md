@@ -16,27 +16,30 @@ Python の標準 GUI ライブラリ `tkinter` だけで作った、ライフゲ
 プレイヤーが操作するゲームというより、初期状態を決めると
 あとは自動的に「進化」していく様子を眺めて楽しむシミュレーションです。
 
-<<<<<<< HEAD
-## Civilizations & territory
+---
 
-Living cells carry a **faction** identity (birth/death stay pure Conway B3/S23,
-with a small stochastic churn on fertile land so colonies never freeze into
-still-lifes). On top of the living cells sit two more Conway-family systems that
-make borders *move*:
+## 文明と領土
 
-- **Territory** — a competitive-diffusion CA (voter model). Each colony radiates
-  influence for its faction; it floods across the land and competes, so the
-  border is the moving line where two factions' influence balance.
-- **Biome expansion** — influence scales with land quality, so a faction on rich
-  land out-pushes a neighbour on poor land and the front flows toward worse terrain.
-- **Vigor** — influence also scales with a faction's size and momentum, so booming
-  empires advance and declining ones retreat as their populations rise and fall.
-- **Gliders-as-armies** — a strong civilization periodically launches a glider that
-  flies across the map (even over ocean) and founds a beachhead colony on landing,
-  opening new fronts far from home. The canonical Conway way to move.
+生きたセルは **勢力（faction）** という所属を持ちます（誕生・死滅は純粋な
+Conway の B3/S23 ルールのままで、肥沃な土地ではわずかな確率的ゆらぎを
+加えることで、コロニーが静止形（still-life）に固まってしまわないように
+しています）。生きたセルの上には、さらに 2 つの Conway 系システムが重なり、
+国境を *動かし* ます。
 
-A live leaderboard tracks each civilization's population and trend.
-=======
+- **領土** … 競争的拡散オートマトン（投票者モデル）。各コロニーは自分の勢力の
+  影響力を放射し、それが土地全体に広がって競い合います。国境は、2 つの勢力の
+  影響力が釣り合う「移動する境界線」です。
+- **バイオーム拡張** … 影響力は土地の質に比例するため、豊かな土地にいる勢力は
+  痩せた土地の隣国を押し返し、前線は劣悪な地形へと流れていきます。
+- **勢い（vigor）** … 影響力は勢力の規模と勢いにも比例するため、繁栄する帝国は
+  前進し、衰退する国は後退します。人口の増減に応じて国境が動きます。
+- **軍隊としてのグライダー** … 強大な文明は周期的にグライダーを発射します。
+  グライダーはマップ上（海の上さえも）を飛び、着地点に橋頭堡となるコロニーを
+  築いて、本国から遠く離れた場所に新たな前線を開きます。移動を表現する、
+  Conway 流の正攻法です。
+
+リアルタイムのリーダーボードが、各文明の人口と増減傾向を追跡します。
+
 ---
 
 ## 必要なもの
@@ -47,7 +50,6 @@ A live leaderboard tracks each civilization's population and trend.
   - Linux で入っていない場合は `sudo apt install python3-tk` などで導入できます。
 
 外部パッケージのインストールは不要です。
->>>>>>> 83ba47d1fb49f5f6eb3b3a5b35f0d02c6b16e737
 
 ---
 
@@ -160,3 +162,5 @@ ROWS = 45        # 縦方向のセル数
   計算途中の状態が次の判定に影響しません。
 - `root.after(self.speed_ms, self.update)` を使い、`tkinter` のイベント
   ループ上で一定間隔ごとに自動更新しています。
+</content>
+</invoke>

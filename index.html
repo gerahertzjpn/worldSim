@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>ConwayBox — a worldbox built on Conway's Game of Life</title>
+<title>ConwayBox — ライフゲームで作るワールドボックス</title>
 <style>
   :root {
     --bg: #0b0e14;
@@ -112,91 +112,92 @@
   <aside id="side">
     <div class="brand">
       <h1>🌍 ConwayBox</h1>
-      <p>A worldbox simulator with <b>Conway's Game&nbsp;of&nbsp;Life</b> at its core.
-         Land, water, fire, forest and climate are all Conway-family cellular automata.
-         Civilizations are living B3/S23 colonies whose <b>territory flows</b> across the map,
-         expanding over rich land and launching <b>gliders</b> to found distant colonies.</p>
+      <p><b>ライフゲーム（Conway's&nbsp;Game&nbsp;of&nbsp;Life）</b>を核にした
+         ワールドボックス・シミュレーターです。
+         陸・水・火・森・気候はすべて Conway 系のセル・オートマトンです。
+         文明は生きた B3/S23 のコロニーで、その<b>領土がマップ上を流れ</b>、
+         豊かな土地へ広がり、<b>グライダー</b>を放って遠方にコロニーを築きます。</p>
     </div>
 
     <div class="section">
-      <h2>World Generation</h2>
+      <h2>ワールド生成</h2>
       <div class="presets" id="presets"></div>
-      <div class="row"><label title="Higher = more land, less ocean">Sea level</label>
+      <div class="row"><label title="高いほど陸が増え、海が減る">海面</label>
         <input type="range" id="p_sea" min="30" max="62" value="46" /><span class="val" id="p_seaV">46</span></div>
-      <div class="row"><label title="More passes = smoother, larger continents">Smoothing</label>
+      <div class="row"><label title="回数が多いほど滑らかで大きな大陸になる">平滑化</label>
         <input type="range" id="p_smooth" min="2" max="16" value="8" /><span class="val" id="p_smoothV">8</span></div>
-      <div class="row"><label title="Global temperature: cold ↔ hot">Climate</label>
+      <div class="row"><label title="全体の気温：寒い ↔ 暑い">気候</label>
         <input type="range" id="p_climate" min="-60" max="60" value="0" /><span class="val" id="p_climateV">0</span></div>
-      <div class="row"><label title="Global humidity: arid ↔ lush">Humidity</label>
+      <div class="row"><label title="全体の湿度：乾燥 ↔ 多湿">湿度</label>
         <input type="range" id="p_humid" min="-80" max="80" value="0" /><span class="val" id="p_humidV">0</span></div>
-      <div class="row"><label title="How much land starts forested">Forest</label>
+      <div class="row"><label title="初期状態で森に覆われる陸の割合">森林</label>
         <input type="range" id="p_forest" min="0" max="60" value="18" /><span class="val" id="p_forestV">18%</span></div>
-      <div class="row"><label title="Number of starting civilizations">Colonies</label>
+      <div class="row"><label title="開始時の文明の数">コロニー</label>
         <input type="range" id="p_col" min="0" max="40" value="7" /><span class="val" id="p_colV">7</span></div>
-      <div class="row"><label title="Seed for reproducible worlds (0 = random)">Seed</label>
+      <div class="row"><label title="同じ世界を再現するためのシード（0 = ランダム）">シード</label>
         <input type="number" id="p_seed" value="0" min="0" style="flex:1.2;width:0;background:var(--panel2);color:var(--ink);border:1px solid var(--border);border-radius:6px;padding:3px 6px;font-size:12px" /></div>
       <div class="btns" style="margin-top:6px">
-        <button class="act primary" id="genBtn">🌐 Generate World</button>
-        <button class="act" id="randBtn" title="Randomize all parameters">🎲</button>
+        <button class="act primary" id="genBtn">🌐 ワールドを生成</button>
+        <button class="act" id="randBtn" title="すべてのパラメータをランダム化">🎲</button>
       </div>
     </div>
 
     <div class="section">
-      <h2>God Tools</h2>
+      <h2>神の道具</h2>
       <div class="tools" id="tools"></div>
     </div>
 
     <div class="section">
-      <h2>Brush</h2>
+      <h2>ブラシ</h2>
       <div class="row">
-        <label>Size</label>
+        <label>サイズ</label>
         <input type="range" id="brush" min="1" max="40" value="7" />
         <span class="val" id="brushVal">7</span>
       </div>
     </div>
 
     <div class="section">
-      <h2>Simulation</h2>
+      <h2>シミュレーション</h2>
       <div class="btns" style="margin-bottom:8px">
-        <button class="act primary" id="playBtn">⏸ Pause</button>
-        <button class="act" id="stepBtn">⏭ Step</button>
+        <button class="act primary" id="playBtn">⏸ 一時停止</button>
+        <button class="act" id="stepBtn">⏭ 1ステップ</button>
       </div>
       <div class="row">
-        <label>Speed</label>
+        <label>速度</label>
         <input type="range" id="speed" min="1" max="60" value="18" />
         <span class="val" id="speedVal">18</span>
       </div>
-      <div class="row" title="Pixel size. Smaller = sharper & more detail (heavier); larger = chunkier (lighter). Rebuilds the world.">
-        <label>Detail</label>
+      <div class="row" title="ピクセルの大きさ。小さいほど精細で重く、大きいほど粗くて軽い。ワールドを再生成します。">
+        <label>精細度</label>
         <input type="range" id="res" min="2" max="10" value="4" />
         <span class="val" id="resVal">4px</span>
       </div>
       <div class="btns">
-        <button class="act" id="clearBtn">🧹 Clear Life</button>
+        <button class="act" id="clearBtn">🧹 生命を消去</button>
       </div>
     </div>
 
     <div class="section">
-      <h2>World</h2>
+      <h2>ワールド</h2>
       <div class="stats" id="stats"></div>
     </div>
 
     <div class="section">
-      <h2>Civilizations</h2>
+      <h2>文明</h2>
       <div id="factions"></div>
     </div>
 
     <div class="section">
-      <h2>Legend</h2>
+      <h2>凡例</h2>
       <div class="legend" id="legend"></div>
     </div>
 
     <div class="section">
-      <h2>Controls</h2>
+      <h2>操作方法</h2>
       <div class="hint">
-        <b>Drag</b> to paint with the selected tool.<br/>
-        <kbd>Space</kbd> play/pause · <kbd>S</kbd> step · <kbd>1–9</kbd> tools<br/>
-        <kbd>[</kbd> <kbd>]</kbd> brush size · <kbd>C</kbd> clear · <kbd>N</kbd> new world
+        選択中の道具で<b>ドラッグ</b>して描きます。<br/>
+        <kbd>Space</kbd> 再生/停止 · <kbd>S</kbd> 1ステップ · <kbd>1–9</kbd> 道具<br/>
+        <kbd>[</kbd> <kbd>]</kbd> ブラシサイズ · <kbd>C</kbd> 消去 · <kbd>N</kbd> 新しい世界
       </div>
     </div>
   </aside>
@@ -205,63 +206,63 @@
 <script>
 "use strict";
 /* =========================================================================
-   ConwayBox — a worldbox built entirely on Conway's Game of Life.
+   ConwayBox — すべてがライフゲーム（Conway's Game of Life）の上に作られた
+   ワールドボックス。
 
-   Architecture: the world is a stack of cellular-automaton layers, every one
-   of them a Conway-family totalistic (neighbour-count) rule:
+   構造：この世界はセル・オートマトン層の積み重ねで、そのいずれもが
+   Conway 系の総和則（隣接セル数に基づくルール）です。
 
-     LIFE    — the literal Conway B3/S23 rule. Living matter / colonies.
-     TERRAIN — majority-smoothing CA: land emerges and erodes.
-     WATER   — Conway-variant CA seeded by low terrain: seas & lakes.
-     FOREST  — slow birth/survival CA on land: vegetation life feeds on.
-     FIRE    — spreading CA: ignites forest & life, then burns out.
+     LIFE    — 正真正銘の Conway B3/S23 ルール。生きた物質／コロニー。
+     TERRAIN — 多数決による平滑化オートマトン：陸地が生成・侵食される。
+     WATER   — 低地に種をまく Conway 派生オートマトン：海と湖。
+     FOREST  — 陸上のゆっくりとした誕生/生存オートマトン：生命の糧となる植生。
+     FIRE    — 延焼オートマトン：森や生命に着火し、やがて燃え尽きる。
 
-   Worldbox "god powers" all work by writing cells into these grids.
-   Civilizations are connected clusters of LIFE cells, given a stable faction
-   colour tracked across generations. Nothing escapes the CA — even the player
-   only ever edits Conway-family grids.
+   ワールドボックスの「神の力」はすべて、これらのグリッドにセルを書き込む
+   ことで働きます。文明は LIFE セルのつながった塊で、世代をまたいで追跡される
+   安定した勢力色が割り当てられます。何ひとつオートマトンの外には出ません
+   ── プレイヤーですら、Conway 系のグリッドを編集しているだけなのです。
    ========================================================================= */
 
-let W = 0, H = 0;                // world grid in cells (sized to fit the screen on boot)
-let CELL = 4;                    // target pixels per cell (sets effective resolution)
+let W = 0, H = 0;                // セル単位のワールドグリッド（起動時に画面に合わせる）
+let CELL = 4;                    // セル1個あたりの目標ピクセル数（実効解像度を決める）
 
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 
-/* ---- grids (flat typed arrays, double-buffered) ---------------------- */
-/* The grid is re-sized to the screen, so N and the arrays are (re)allocated
-   by allocGrids() rather than fixed at load time. */
+/* ---- グリッド（フラットな型付き配列、ダブルバッファ） ---------------- */
+/* グリッドは画面サイズに合わせて作り直されるため、N と各配列は読み込み時に
+   固定されるのではなく、allocGrids() で（再）確保されます。 */
 let N = W * H;
 let idx = (x, y) => y * W + x;
 
-// LIFE: 0 dead, else faction id (1..). Conway B3/S23 on (cell>0).
+// LIFE: 0 は死、それ以外は勢力 id（1..）。cell>0 に対して Conway B3/S23。
 let life, lifeNext;
-// TERRAIN: 0 sea-floor (low), 1 land (high). Smoothing CA.
+// TERRAIN: 0 は海底（低地）、1 は陸地（高地）。平滑化オートマトン。
 let land, landNext;
-// WATER: 0 dry, 1 water. Conway-variant constrained to low terrain.
+// WATER: 0 は乾いた地、1 は水。低地に制限された Conway 派生ルール。
 let water, waterNext;
-// FOREST: 0 none, 1 forest. Slow growth CA on land.
+// FOREST: 0 はなし、1 は森。陸上のゆっくりした成長オートマトン。
 let forest, forestNext;
-// FIRE: 0 none, >0 remaining burn ticks. Spreading CA.
+// FIRE: 0 はなし、>0 は残りの燃焼ティック数。延焼オートマトン。
 let fire, fireNext;
-// TEMP: 0..255 temperature field. Diffusion CA relaxing toward a latitude
-//       gradient; water moderates, land swings more. (Conway-family: next
-//       state is a function of the cell's neighbourhood average.)
+// TEMP: 0..255 の温度場。緯度勾配へ緩和する拡散オートマトン。水は気温を
+//       和らげ、陸は大きく振れる。（Conway 系：次の状態はセルの近傍平均の関数。）
 let temp, tempNext;
-// MOIST: 0..255 humidity field. Diffusion CA sourced by water, dried by heat.
+// MOIST: 0..255 の湿度場。水を供給源とし、熱で乾燥する拡散オートマトン。
 let moist, moistNext;
-// ICE: 0/1. Water freezes below a temp threshold, melts above. Threshold CA.
+// ICE: 0/1。水は温度しきい値を下回ると凍り、上回ると融ける。しきい値オートマトン。
 let ice, iceNext;
-// BIOME: derived each frame from temp+moist+land (not a separate simulation).
+// BIOME: 毎フレーム temp+moist+land から導出される（独立したシミュレーションではない）。
 let biome;
-// AGE: per-cell how many generations this cell has stayed continuously alive.
-//      Rises while a cell survives, resets to 0 on (re)birth. Old, stable
-//      clusters read as developed "cities"; churny frontier reads as young.
+// AGE: セルごとに、何世代連続で生き続けているか。生き残るあいだ増加し、
+//      （再）誕生で 0 にリセットされる。古く安定した塊は発展した「都市」として、
+//      めまぐるしく変わる辺境は若い土地として読み取れる。
 let age, ageNext;
-// TERRITORY: a competitive-diffusion CA (voter model). terr = owning faction
-//   id per cell; terrStr = how strongly it's held. Living cells inject influence
-//   for their faction (scaled by biome quality); it floods across empty land and
-//   competes, so borders are the moving line where two factions' influence meet.
+// TERRITORY: 競争的拡散オートマトン（投票者モデル）。terr はセルごとの所有勢力
+//   id、terrStr はどれだけ強く保持されているか。生きたセルは（バイオームの質に
+//   応じて）自勢力の影響力を注入し、それが空き地に広がって競い合う。国境は
+//   2 つの勢力の影響力がぶつかる、移動する境界線となる。
 let terr, terrNext, terrStr, terrStrNext;
 
 function allocGrids(){
@@ -282,10 +283,10 @@ function allocGrids(){
 }
 allocGrids();
 
-/* ---- biome ids & their base colours ---------------------------------- */
+/* ---- バイオーム id とその基本色 -------------------------------------- */
 const B_SEA=0, B_ICE=1, B_SNOW=2, B_TUNDRA=3, B_DESERT=4,
       B_GRASS=5, B_FOREST=6, B_SWAMP=7, B_SHALLOW=8;
-// [r,g,b] base colour per biome (life/fire/forest drawn on top of these)
+// バイオームごとの基本色 [r,g,b]（生命・火・森はこの上に描かれる）
 const BIOME_COL = {
   [B_SEA]:    [20,58,110],
   [B_SHALLOW]:[46,110,170],
@@ -299,22 +300,22 @@ const BIOME_COL = {
 };
 
 /* =========================================================================
-   WORLD PARAMETERS — every knob the generator reads. Driven by the UI sliders
-   and the preset buttons. Change these, hit "New World", and the whole CA
-   stack is regenerated under the new conditions.
+   ワールドパラメータ — 生成器が読み取るすべてのつまみ。UI のスライダーと
+   プリセットボタンによって駆動される。これらを変えて「新しい世界」を押すと、
+   新しい条件のもとでオートマトン層すべてが再生成される。
    ========================================================================= */
 const worldParams = {
-  seaLevel:    0.46,  // terrain noise threshold: higher => more land
-  landSmooth:  8,     // continent smoothing passes: higher => smoother coasts
-  climate:     0,     // global temperature offset (-60 frozen .. +60 scorched)
-  humidity:    0,     // global humidity offset   (-80 arid  .. +80 lush)
-  forestDens:  0.18,  // fraction of land that starts forested
-  colonies:    7,     // number of starter civilizations
-  lifeDensity: 0.45,  // how dense each starter colony's soup is
-  seed:        0,     // RNG seed (0 = random each time)
+  seaLevel:    0.46,  // 地形ノイズのしきい値：高いほど陸が増える
+  landSmooth:  8,     // 大陸の平滑化回数：多いほど海岸線が滑らかになる
+  climate:     0,     // 全体の気温オフセット（-60 凍結 .. +60 灼熱）
+  humidity:    0,     // 全体の湿度オフセット（-80 乾燥 .. +80 多湿）
+  forestDens:  0.18,  // 初期状態で森に覆われる陸の割合
+  colonies:    7,     // 開始時の文明の数
+  lifeDensity: 0.45,  // 各初期コロニーのスープの密度
+  seed:        0,     // RNG シード（0 = 毎回ランダム）
 };
 
-// Faction palette — each living colony cluster is recoloured to its faction.
+// 勢力パレット — 生きたコロニーの塊は、それぞれの勢力の色に塗り直される。
 const FACTIONS = [
   [78,168,222],[123,224,173],[224,160,108],[200,120,210],
   [230,210,110],[120,200,230],[235,120,140],[150,220,120]
@@ -322,39 +323,40 @@ const FACTIONS = [
 const NFAC = FACTIONS.length;
 let nextFaction = 1;
 
-// Per-faction live state, indexed by faction id (1..NFAC), refreshed each step.
-const facPop      = new Int32Array(NFAC+1);   // current population
-const facPrevPop  = new Int32Array(NFAC+1);   // last generation's population (for trend)
-const facVigor    = new Float32Array(NFAC+1); // 0.3..1.6 territorial push (smoothed)
-const facName     = [];                        // display names, index = faction id
-const FAC_NAMES = ['Azurians','Verdani','Amberfolk','Violeti','Goldmark',
-                   'Cyanid','Crimsi','Limeard'];
+// 勢力ごとの実行時状態。勢力 id（1..NFAC）でインデックスし、毎ステップ更新する。
+const facPop      = new Int32Array(NFAC+1);   // 現在の人口
+const facPrevPop  = new Int32Array(NFAC+1);   // 前世代の人口（増減傾向の算出用）
+const facVigor    = new Float32Array(NFAC+1); // 0.3..1.6 の領土拡張の勢い（平滑化済み）
+const facName     = [];                        // 表示名、インデックス = 勢力 id
+const FAC_NAMES = ['アズール','ヴェルダン','アンバー','ヴィオレ','ゴルドマーク',
+                   'シアニド','クリムジ','ライマード'];
 for (let f=1; f<=NFAC; f++) facName[f] = FAC_NAMES[(f-1)%FAC_NAMES.length];
 
-// Count current population of every faction (one cheap pass over the grid),
-// rolling the previous counts so growth/decline momentum can be measured.
+// 各勢力の現在の人口を数える（グリッドを軽く 1 周）。前回の値を繰り越して、
+// 増加/減少の勢いを測れるようにする。
 function countFactions(){
   facPrevPop.set(facPop);
   facPop.fill(0);
   for (let i=0;i<N;i++){ const v=life[i]; if (v) facPop[v]++; }
 }
 
-// Vigor = how hard a faction pushes its borders, from its size and momentum.
-// A booming empire projects more influence and advances; a declining one
-// retreats. Because GoL populations rise and fall, this makes borders MOVE.
+// 勢い（vigor）= 勢力が国境をどれだけ強く押し広げるか。規模と勢いから決まる。
+// 急成長する帝国はより強い影響力を放って前進し、衰退する国は後退する。
+// ライフゲームの人口は増減するため、これにより国境が「動く」。
 function updateFactionVigor(){
   let maxP=1; for (let f=1; f<=NFAC; f++) if (facPop[f]>maxP) maxP=facPop[f];
   for (let f=1; f<=NFAC; f++){
-    const rel = facPop[f]/maxP;                              // 0..1 relative size
-    const mom = (facPop[f]-facPrevPop[f])/(facPop[f]+30);    // growth momentum
+    const rel = facPop[f]/maxP;                              // 0..1 の相対的な規模
+    const mom = (facPop[f]-facPrevPop[f])/(facPop[f]+30);    // 成長の勢い
     const target = 0.45 + rel*0.85 + Math.max(-0.3, Math.min(0.45, mom*5));
-    facVigor[f] += (target - facVigor[f]) * 0.12;            // smooth (war inertia)
+    facVigor[f] += (target - facVigor[f]) * 0.12;            // 平滑化（戦争の慣性）
   }
 }
 
-/* ---- random helpers --------------------------------------------------- */
-// Seedable PRNG (mulberry32). `rng()` returns 0..1; generation uses it so a
-// given seed reproduces the same world. Live simulation keeps using Math.random.
+/* ---- 乱数ヘルパー ----------------------------------------------------- */
+// シード指定可能な PRNG（mulberry32）。`rng()` は 0..1 を返す。生成処理が
+// これを使うため、同じシードからは同じ世界が再現される。実行中の
+// シミュレーションは引き続き Math.random を使う。
 let _rngState = (Math.random()*2**32)>>>0;
 function rng(){
   _rngState |= 0; _rngState = (_rngState + 0x6D2B79F5) | 0;
@@ -366,41 +368,41 @@ function seedRng(s){ _rngState = (s>>>0) || ((Math.random()*2**32)>>>0); }
 function rnd(n){ return Math.floor(rng()*n); }
 
 /* =========================================================================
-   WORLD GENERATION — terrain itself is grown by a Conway-family CA.
-   We seed noise then run a majority-smoothing automaton (a totalistic rule:
-   a cell becomes land if >=5 of its 9-neighbourhood are land) to grow
-   organic continents. Same family as Conway, different birth/survival counts.
+   ワールド生成 — 地形そのものが Conway 系オートマトンで育てられる。
+   まずノイズを種としてまき、多数決による平滑化オートマトン（総和則：
+   9 近傍のうち 5 つ以上が陸ならそのセルも陸になる）を走らせて、
+   有機的な大陸を育てる。Conway と同じ系統で、誕生/生存の数だけが異なる。
    ========================================================================= */
 function generateWorld(){
   const P = worldParams;
-  seedRng(P.seed);                       // reproducible if a seed is set
+  seedRng(P.seed);                       // シードが設定されていれば再現可能
   season = 0;
-  buildLatWarp();                        // wavy climate bands for this world
+  buildLatWarp();                        // この世界用の波打つ気候帯
 
-  // seed terrain noise (seaLevel sets how much becomes land)
+  // 地形ノイズの種まき（seaLevel が陸になる量を決める）
   for (let i=0;i<N;i++) land[i] = rng() < P.seaLevel ? 1 : 0;
-  // smoothing passes -> continents
+  // 平滑化を繰り返す -> 大陸
   const passes = Math.max(2, P.landSmooth|0);
   for (let pass=0; pass<passes; pass++){
     for (let y=0;y<H;y++) for (let x=0;x<W;x++){
       let c=0;
       for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
         const nx=x+dx, ny=y+dy;
-        if (nx<0||ny<0||nx>=W||ny>=H){ c++; continue; } // edges bias to land
+        if (nx<0||ny<0||nx>=W||ny>=H){ c++; continue; } // 端は陸寄りにバイアス
         if (land[idx(nx,ny)]) c++;
       }
       landNext[idx(x,y)] = c>=5 ? 1 : 0;
     }
     [land,landNext]=[landNext,land];
   }
-  // water fills every non-land cell (the sea), forest sprinkled on land
+  // 陸でないセルはすべて水（海）で埋め、陸には森を点在させる
   forest.fill(0); water.fill(0); fire.fill(0); life.fill(0); ice.fill(0);
   for (let i=0;i<N;i++){
     if (!land[i]) water[i]=1;
     else if (rng()<P.forestDens) forest[i]=1;
   }
-  // seed the climate fields, then relax. (climate offset lives inside
-  // latitudeTemp so stepTemp keeps honouring it instead of decaying it away.)
+  // 気候場に種をまき、緩和させる。（気候オフセットは latitudeTemp の内側に
+  // あるため、stepTemp はそれを減衰させずに尊重し続ける。）
   for (let y=0;y<H;y++) for (let x=0;x<W;x++){
     const i=idx(x,y);
     temp[i]  = latitudeTemp(y, x);
@@ -409,9 +411,9 @@ function generateWorld(){
   for (let k=0;k<14;k++){ stepTemp(); stepMoist(); stepIce(); }
   classifyBiomes();
 
-  // reset civilization state, then drop a handful of discrete starter colonies
-  // on fertile land. (No blanket stippling — that buried the map in oscillator
-  // noise. Distinct colonies grow into readable clusters.)
+  // 文明の状態をリセットし、肥沃な土地に少数の離散的な初期コロニーを
+  // 配置する。（全面的な点描はしない ── それはマップを振動子ノイズで
+  // 埋め尽くしてしまった。個別のコロニーは読み取れる塊へと育つ。）
   age.fill(0);
   terr.fill(0); terrStr.fill(0);
   gliders = [];
@@ -420,29 +422,29 @@ function generateWorld(){
   nextFaction = 1;
   seedColonies(P.colonies, P.lifeDensity);
   countFactions();
-  // flood the initial territory so the political map exists from generation 0
+  // 初期領土を広げ、第 0 世代から政治地図が存在するようにする
   for (let k=0;k<130;k++) stepInfluence();
   draw();
   updateStats();
 }
 
-/* Drop `count` starter colonies, grouped into a few clusters so rival factions
-   share a landmass and therefore share borders. Isolated colonies on separate
-   islands never contest territory; clustered ones go to war. */
+/* `count` 個の初期コロニーを、いくつかのクラスタにまとめて配置する。これにより
+   ライバル勢力が同じ大陸を共有し、ひいては国境を接する。別々の島に孤立した
+   コロニーは決して領土を争わないが、密集したコロニーは戦争になる。 */
 function seedColonies(count, density){
   if (count<=0) return;
   const perCluster = 3;
   const clusters = Math.max(1, Math.round(count/perCluster));
   let placed=0, guard=0;
   for (let c=0; c<clusters && placed<count; c++){
-    // find a fertile cluster centre
+    // 肥沃なクラスタ中心を探す
     let cx=-1, cy=-1, g2=0;
     while (g2++<400){
       const x=rnd(W), y=rnd(H), i=idx(x,y);
       if (land[i] && !water[i] && !ice[i] && isFertile(i)){ cx=x; cy=y; break; }
     }
     if (cx<0) continue;
-    // drop several rival colonies clustered around the centre (same landmass)
+    // 中心の周りに複数のライバルコロニーを密集して配置する（同じ大陸）
     let made=0, g3=0;
     while (made<Math.min(perCluster, count-placed) && g3++<400){
       const x = cx + rnd(46)-23, y = cy + rnd(46)-23;
@@ -453,7 +455,7 @@ function seedColonies(count, density){
       placed++; made++;
     }
   }
-  // place any leftover colonies anywhere fertile
+  // 残ったコロニーは、肥沃な場所ならどこにでも配置する
   while (placed<count && guard++<count*200){
     const x=rnd(W), y=rnd(H), i=idx(x,y);
     if (!land[i] || water[i] || ice[i] || !isFertile(i)) continue;
@@ -461,10 +463,10 @@ function seedColonies(count, density){
   }
 }
 
-/* A colony = a small Conway soup stamped onto land, tagged with a faction.
-   `density` (0..1) controls how packed the soup is. `fac` forces a faction id
-   (used by glider landings); 0 = take the next faction in rotation. Used by
-   world-gen, the Colony god-tool, and glider beachheads. */
+/* コロニー = 陸に押し当てた小さな Conway のスープに、勢力タグを付けたもの。
+   `density`（0..1）はスープの密度を制御する。`fac` は勢力 id を強制する
+   （グライダーの着地で使う）。0 = 順番に次の勢力を取る。ワールド生成・
+   コロニー神具・グライダーの橋頭堡で使われる。 */
 function seedColony(cx, cy, density=0.5, fac=0, radius=7){
   let f = fac;
   if (!f){ f = nextFaction++; if (nextFaction>NFAC) nextFaction=1; }
@@ -474,28 +476,27 @@ function seedColony(cx, cy, density=0.5, fac=0, radius=7){
     const x=cx+dx, y=cy+dy;
     if (x<1||y<1||x>=W-1||y>=H-1) continue;
     const i=idx(x,y);
-    if (water[i]||ice[i]) continue;                 // not on open water/ice
+    if (water[i]||ice[i]) continue;                 // 開けた水・氷の上には置かない
     if (rng()<density) life[i] = f;
   }
 }
 
 /* =========================================================================
-   GLIDERS-AS-ARMIES — the canonical Conway way to move across the map. A
-   strong civilization periodically launches a glider toward distant land; it
-   flies (even over ocean, reaching new continents) and on landing founds a
-   colony of its faction — a beachhead that then projects influence and opens a
-   new front. Launch and landing are real Conway cells; the flight is a managed
-   overlay so it reliably reaches its target.
+   軍隊としてのグライダー — マップ上を移動するための、Conway 流の正攻法。
+   強大な文明は周期的に、遠方の陸地へ向けてグライダーを発射する。それは
+   （海の上さえも飛んで新大陸に到達し）着地すると、自勢力のコロニー ──
+   その後に影響力を放ち新たな前線を開く橋頭堡 ── を築く。発射と着地は
+   本物の Conway セルだが、飛行は確実に目標へ届くよう管理されたオーバーレイ。
    ========================================================================= */
 let gliders = [];                 // {x,y,vx,vy,fac,ttl}
 let gliderWaveTick = 0;
-const GLIDER_SPEED   = 0.9;       // cells advanced per generation
-const GLIDER_TTL     = 700;       // max flight length (generations)
-const GLIDER_WAVE    = 16;        // generations between launch waves
-const GLIDER_MAX     = 30;        // cap simultaneous gliders
-const GLIDER_MIN_POP = 40;        // a faction needs this many cells to launch
+const GLIDER_SPEED   = 0.9;       // 1 世代あたりに進むセル数
+const GLIDER_TTL     = 700;       // 最大飛行距離（世代）
+const GLIDER_WAVE    = 16;        // 発射ウェーブの間隔（世代）
+const GLIDER_MAX     = 30;        // 同時に存在できるグライダー数の上限
+const GLIDER_MIN_POP = 40;        // 発射に必要な勢力の最低セル数
 
-// pick a living border cell of faction f to launch from (sampled, no full scan)
+// 勢力 f の生きた国境セルを発射元として選ぶ（サンプリング、全走査はしない）
 function findLaunchSite(f){
   for (let t=0;t<60;t++){
     const x=rnd(W), y=rnd(H), i=idx(x,y);
@@ -503,18 +504,18 @@ function findLaunchSite(f){
   }
   return null;
 }
-// pick a target: prefer fertile land NOT owned by f (neutral frontier or enemy),
-// a good distance away, sampled cheaply.
+// 目標を選ぶ：f が所有していない肥沃な土地（中立の辺境または敵地）で、
+// ほどよく離れた場所を優先。軽くサンプリングして選ぶ。
 function findGliderTarget(sx,sy,f){
   let best=null, bestScore=-1;
   for (let t=0;t<70;t++){
     const x=rnd(W), y=rnd(H), i=idx(x,y);
     if (!land[i] || water[i] || ice[i] || !isFertile(i)) continue;
-    if (terr[i]===f) continue;                      // skip our own land
+    if (terr[i]===f) continue;                      // 自分の土地は飛ばす
     const dx=x-sx, dy=y-sy, d=Math.sqrt(dx*dx+dy*dy);
-    if (d<25) continue;                             // must be a real expedition
-    const enemy = terr[i]!==0 ? 1.4 : 1.0;          // bias toward attacking rivals
-    const score = enemy * (1 - Math.abs(d-120)/200);// favour ~mid-range targets
+    if (d<25) continue;                             // 本物の遠征であること
+    const enemy = terr[i]!==0 ? 1.4 : 1.0;          // ライバルへの攻撃を優先
+    const score = enemy * (1 - Math.abs(d-120)/200);// 中距離ほどの目標を好む
     if (score>bestScore){ bestScore=score; best={x,y}; }
   }
   return best;
@@ -524,7 +525,7 @@ function launchGliderWave(){
   for (let f=1; f<=NFAC; f++){
     if (facPop[f] < GLIDER_MIN_POP) continue;
     if (gliders.length >= GLIDER_MAX) break;
-    if (Math.random() > 0.5) continue;              // ~half the factions launch each wave
+    if (Math.random() > 0.5) continue;              // 各ウェーブで約半数の勢力が発射
     const src = findLaunchSite(f); if (!src) continue;
     const tgt = findGliderTarget(src.x, src.y, f); if (!tgt) continue;
     let dx=tgt.x-src.x, dy=tgt.y-src.y; const d=Math.sqrt(dx*dx+dy*dy)||1;
@@ -538,20 +539,20 @@ function stepGliders(){
   for (let k=gliders.length-1; k>=0; k--){
     const g=gliders[k];
     g.x += g.vx*GLIDER_SPEED; g.y += g.vy*GLIDER_SPEED; g.ttl--;
-    if (g.x<0) g.x+=W; else if (g.x>=W) g.x-=W;     // toroidal flight
+    if (g.x<0) g.x+=W; else if (g.x>=W) g.x-=W;     // トーラス状の飛行
     if (g.y<0) g.y+=H; else if (g.y>=H) g.y-=H;
     if (g.ttl<=0){ gliders.splice(k,1); continue; }
     const ix=g.x|0, iy=g.y|0, i=iy*W+ix;
-    // the army flies the whole way to its target and lands when it arrives
-    // (so you watch it cross seas to a distant shore, not stop at the border).
+    // 軍隊は目標まで全行程を飛び、到着したときに着地する
+    //（国境で止まるのではなく、海を越えて遠い岸へ向かう様子を眺められる）。
     const dxt=g.tx-ix, dyt=g.ty-iy;
-    const nearTarget = (dxt*dxt+dyt*dyt) <= 9;       // within ~3 cells of target
+    const nearTarget = (dxt*dxt+dyt*dyt) <= 9;       // 目標から約 3 セル以内
     if (nearTarget){
-      // found the beachhead if it's viable land; otherwise just disband
+      // 入植可能な陸なら橋頭堡を築く。そうでなければ解散するだけ
       if (land[i] && !water[i] && !ice[i] && isFertile(i))
         seedColony(ix, iy, 0.55, g.fac, 5);
       else {
-        // target spoiled — drop the colony on the nearest fertile land we can see
+        // 目標が使えない ── 見える範囲で最も近い肥沃な陸にコロニーを置く
         for (let s=0;s<12;s++){
           const jx=ix+rnd(7)-3, jy=iy+rnd(7)-3;
           if (jx<2||jy<2||jx>=W-2||jy>=H-2) continue;
@@ -565,60 +566,59 @@ function stepGliders(){
 }
 
 /* =========================================================================
-   CLIMATE — temperature & humidity are diffusion CAs (Conway-family: each
-   cell's next value is a function of its neighbourhood). A latitude gradient
-   plus a slow seasonal swing act as the temperature source; water cools and
-   humidifies. Biomes are then read off these fields. Ice is a threshold CA.
+   気候 — 気温と湿度は拡散オートマトン（Conway 系：各セルの次の値はその近傍の
+   関数）。緯度勾配とゆっくりした季節変動が温度の供給源として働き、水は冷却し
+   湿らせる。バイオームはこれらの場から読み取られる。氷はしきい値オートマトン。
    ========================================================================= */
-let season = 0;          // 0..2π, advances slowly -> summer/winter swing
+let season = 0;          // 0..2π、ゆっくり進む -> 夏/冬の変動
 const SEASON_SPEED = 0.012;
-let seasonAmp = 55;      // how many temp-units the seasons swing the poles
+let seasonAmp = 55;      // 季節が極地の気温を何単位揺らすか
 
-// Per-column warp of the latitude line, so the cold/hot bands (and therefore
-// the ice caps) are wavy and organic rather than ruler-straight stripes.
-// Rebuilt for each world in generateWorld() from a few summed sine waves.
+// 緯度線を列ごとにゆがめ、寒暖の帯（ひいては氷冠）を定規で引いたような直線の
+// 縞ではなく、波打った有機的なものにする。
+// generateWorld() で世界ごとに、いくつかの正弦波の和から作り直される。
 let latWarp = null;
 function buildLatWarp(){
   latWarp = new Float32Array(Math.max(1,W));
   const a1=8+rng()*10, a2=4+rng()*6, p1=rng()*6.28, p2=rng()*6.28,
         f1=(1+rng()*2)*Math.PI*2/W, f2=(3+rng()*3)*Math.PI*2/W;
   for (let x=0;x<W;x++){
-    latWarp[x] = Math.sin(x*f1+p1)*a1 + Math.sin(x*f2+p2)*a2; // ±~20 cells
+    latWarp[x] = Math.sin(x*f1+p1)*a1 + Math.sin(x*f2+p2)*a2; // ±約 20 セル
   }
 }
 
-// Base temperature at (x,y): cold poles, hot equator, with the latitude line
-// warped per-column so climate bands are wavy. + seasonal swing.
+// (x,y) での基準温度：極は寒く赤道は暑い。緯度線は列ごとにゆがめられて
+// 気候帯が波打つ。＋ 季節変動。
 function latitudeTemp(y, x){
   let yy = y;
-  if (x!==undefined && latWarp) yy = y + latWarp[x];   // warp the band
-  const lat = Math.min(1, Math.abs(yy - H/2) / (H/2));  // 0 equator, 1 pole
-  const base = 235 - lat*lat*205;          // equator ~235, poles ~30
-  const swing = Math.sin(season) * seasonAmp * (0.3 + 0.7*lat); // poles swing most
+  if (x!==undefined && latWarp) yy = y + latWarp[x];   // 帯をゆがめる
+  const lat = Math.min(1, Math.abs(yy - H/2) / (H/2));  // 0 が赤道、1 が極
+  const base = 235 - lat*lat*205;          // 赤道 ~235、極 ~30
+  const swing = Math.sin(season) * seasonAmp * (0.3 + 0.7*lat); // 極が最も振れる
   return Math.max(0, Math.min(255, Math.round(base + swing + worldParams.climate)));
 }
 
-// Diffusion: relax each cell toward the average of its 4-neighbourhood, pulled
-// back toward its latitude source. Water is a strong cold/stable anchor.
+// 拡散：各セルを 4 近傍の平均へ緩和させつつ、その緯度の供給源へ引き戻す。
+// 水は強力な冷却・安定のアンカーとなる。
 function stepTemp(){
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
       const i=idx(x,y);
-      const src = latitudeTemp(y, x);      // warped latitude source
+      const src = latitudeTemp(y, x);      // ゆがめた緯度の供給源
       let s=temp[i], c=1;
       if (x>0){ s+=temp[i-1]; c++; }      if (x<W-1){ s+=temp[i+1]; c++; }
       if (y>0){ s+=temp[i-W]; c++; }      if (y<H-1){ s+=temp[i+W]; c++; }
-      let v = s/c;                         // neighbourhood average (diffusion)
-      v += (src - v) * 0.10;               // pull toward latitude source
-      if (ice[i])        v += (70  - v) * 0.12;   // ice stays cool (mild self-reinforce)
-      else if (water[i]) v += (120 - v) * 0.10;   // open sea moderates climate
+      let v = s/c;                         // 近傍平均（拡散）
+      v += (src - v) * 0.10;               // 緯度の供給源へ引き寄せる
+      if (ice[i])        v += (70  - v) * 0.12;   // 氷は冷たいまま（穏やかな自己強化）
+      else if (water[i]) v += (120 - v) * 0.10;   // 開けた海は気候を和らげる
       tempNext[i] = Math.max(0, Math.min(255, Math.round(v)));
     }
   }
   [temp,tempNext]=[tempNext,temp];
 }
 
-// Humidity diffuses similarly; seas are humidity sources, heat dries the air.
+// 湿度も同様に拡散する。海は湿度の供給源、熱は空気を乾かす。
 function stepMoist(){
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
@@ -627,38 +627,38 @@ function stepMoist(){
       if (x>0){ s+=moist[i-1]; c++; }     if (x<W-1){ s+=moist[i+1]; c++; }
       if (y>0){ s+=moist[i-W]; c++; }     if (y<H-1){ s+=moist[i+W]; c++; }
       let v = s/c;
-      if (water[i]) v += (235 - v)*0.18;            // sea humidifies (its own cell)
+      if (water[i]) v += (235 - v)*0.18;            // 海は湿らせる（そのセル自身）
       else {
-        // land relaxes toward a mild baseline (so it doesn't run away to bone-dry
-        // everywhere); only genuine heat actively desiccates it.
-        v += (90 - v) * 0.03;                       // gentle pull to a temperate baseline
-        v -= Math.max(0,(temp[i]-150))*0.045;       // real heat dries land
+        // 陸は穏やかな基準値へ緩和する（どこもかしこもカラカラに乾ききって
+        // しまわないように）。本当の熱だけが積極的に陸を乾燥させる。
+        v += (90 - v) * 0.03;                       // 温暖な基準値へ穏やかに引き寄せる
+        v -= Math.max(0,(temp[i]-150))*0.045;       // 本物の熱が陸を乾かす
       }
-      if (forest[i]) v += 4;                        // forests hold moisture
+      if (forest[i]) v += 4;                        // 森は水分を保つ
       moistNext[i] = Math.max(0, Math.min(255, Math.round(v)));
     }
   }
   [moist,moistNext]=[moistNext,moist];
 }
 
-// ICE: cold water freezes into sea ice; very cold land grows glaciers. Modelled
-// as a CA so caps have organic edges instead of straight latitude stripes:
-//   • an iced cell stays frozen until it clearly warms (hysteresis -> recedes
-//     gradually with the seasons, doesn't flicker);
-//   • a cell freezes if it's very cold, OR moderately cold AND touching ice
-//     (the cap creeps outward along the cold front -> ragged, natural shape).
+// ICE: 冷たい海水は海氷に凍り、極寒の陸地には氷河が育つ。氷冠を直線的な緯度の
+// 縞ではなく有機的な縁にするため、オートマトンとしてモデル化している：
+//   • 氷のセルは、はっきり暖まるまで凍ったまま（ヒステリシス -> 季節とともに
+//     徐々に後退し、ちらつかない）；
+//   • セルが凍るのは、非常に冷たいとき、または ほどほどに冷たく かつ 氷に
+//     接しているとき（氷冠は寒冷前線に沿って外へ這い広がる -> ぎざぎざで自然な形）。
 function stepIce(){
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
       const i=idx(x,y);
       if (ice[i]){
-        iceNext[i] = temp[i] < 102 ? 1 : 0;     // melt when warmed past 102
+        iceNext[i] = temp[i] < 102 ? 1 : 0;     // 102 を超えて暖まると融ける
         continue;
       }
       const t = temp[i];
-      const coreThresh = water[i] ? 74 : 64;     // hard freeze (no ice needed)
+      const coreThresh = water[i] ? 74 : 64;     // 強い凍結（氷は不要）
       if (t < coreThresh){ iceNext[i]=1; continue; }
-      // marginal cold: freeze only if an adjacent cell is already iced (spread)
+      // わずかな寒さ：隣接セルがすでに凍っているときだけ凍る（伝播）
       const edgeThresh = water[i] ? 92 : 84;
       if (t < edgeThresh){
         let nIce=0;
@@ -675,20 +675,20 @@ function stepIce(){
   [ice,iceNext]=[iceNext,ice];
 }
 
-// Classify each cell's biome from the climate fields. Cheap lookup, no sim.
+// 各セルのバイオームを気候場から分類する。軽い参照のみ、シミュレーションなし。
 function classifyBiomes(){
   for (let i=0;i<N;i++){
-    if (ice[i]){ biome[i] = B_ICE; continue; }       // sea ice or land glacier
+    if (ice[i]){ biome[i] = B_ICE; continue; }       // 海氷または陸の氷河
     if (!land[i]){ biome[i] = B_SEA; continue; }
-    if (water[i]){ biome[i] = B_SHALLOW; continue; } // flooded land
+    if (water[i]){ biome[i] = B_SHALLOW; continue; } // 水没した陸
     const t=temp[i], m=moist[i];
     let b;
-    // forest (planted or grown) shades & holds moisture, so it reads as forest
-    // even on otherwise dry/sandy ground — a green oasis, never dead desert.
+    // 森（植えたものでも育ったものでも）は日陰を作り水分を保つので、本来は
+    // 乾いた砂地でも森として読み取れる ── 緑のオアシスであって、死の砂漠ではない。
     if (forest[i] && t>=70)  b = B_FOREST;
     else if (t < 70)        b = B_SNOW;
     else if (t < 110)       b = B_TUNDRA;
-    // desert only where it's both hot AND genuinely arid (was: any dry cell)
+    // 砂漠は、暑く かつ 本当に乾燥している場所のみ（以前は：乾いたセルすべて）
     else if (m < 48 && t > 165) b = B_DESERT;
     else if (m > 205)       b = B_SWAMP;
     else if (m > 150)       b = B_FOREST;
@@ -697,16 +697,16 @@ function classifyBiomes(){
   }
 }
 
-// Fertility for life is now driven by biome: lush biomes support civilization,
-// desert/snow/ice do not. Returns true where life gets its survival bonus.
+// 生命の肥沃さは今やバイオームで決まる：豊かなバイオームは文明を支え、
+// 砂漠/雪/氷は支えない。生命が生存ボーナスを得る場所で true を返す。
 function isFertile(i){
   const b = biome[i];
   return b===B_GRASS || b===B_FOREST || b===B_SWAMP;
 }
 
-// Biome quality drives how strongly a colony projects territorial influence:
-// a faction on rich land out-pushes a neighbour on poor land, so the border
-// flows toward worse terrain. (This is the "biome expansion" mechanism.)
+// バイオームの質は、コロニーがどれだけ強く領土の影響力を放つかを決める：
+// 豊かな土地にいる勢力は痩せた土地の隣国を押し返すので、国境は劣悪な地形へ
+// 流れていく。（これが「バイオーム拡張」の仕組み。）
 function biomeQuality(i){
   switch (biome[i]){
     case B_FOREST: case B_SWAMP: return 1.5;
@@ -718,19 +718,18 @@ function biomeQuality(i){
   }
 }
 
-/* ---- TERRITORY: competitive-diffusion CA (voter model) ----------------
-   Each living cell injects influence for its faction, scaled by biome quality.
-   On empty land the influence floods outward, losing TERR_DECAY per cell, and
-   competes: a cell is owned by whichever faction's flood is strongest here. The
-   border is the moving line where two factions' influence balance — it drifts
-   as colonies grow/shrink and as richer land out-pushes poorer. Inertia keeps
-   the line from flickering. Water/ice/sea can't be owned. */
-const _ti = new Float32Array(NFAC+1);    // per-faction influence (max) scratch
-const _tiT = new Int32Array(9);          // faction ids touched this cell
-const TERR_DECAY   = 1.5;   // influence lost per cell — low, so territories reach
-                            // far enough to actually meet and contest (≈170 cells)
-const TERR_SOURCE  = 80;    // base influence a living cell injects
-const TERR_INERTIA = 1.04;  // current owner's edge needed to be displaced
+/* ---- TERRITORY: 競争的拡散オートマトン（投票者モデル） ----------------
+   各生きたセルは、バイオームの質に応じて自勢力の影響力を注入する。空き地では
+   影響力が外へ広がり、1 セルごとに TERR_DECAY を失いながら競い合う：あるセルは、
+   ここで最も強く流れ込んできた勢力に所有される。国境は 2 つの勢力の影響力が
+   釣り合う移動する境界線 ── コロニーの増減や、豊かな土地が痩せた土地を押し返す
+   ことで漂う。慣性が境界線のちらつきを防ぐ。水・氷・海は所有できない。 */
+const _ti = new Float32Array(NFAC+1);    // 勢力ごとの影響力（最大）の作業用
+const _tiT = new Int32Array(9);          // このセルで触れた勢力 id
+const TERR_DECAY   = 1.5;   // 1 セルごとに失う影響力 ── 低めにして、領土が
+                            // 実際にぶつかって争えるほど遠くまで届くようにする（約 170 セル）
+const TERR_SOURCE  = 80;    // 生きたセルが注入する基本影響力
+const TERR_INERTIA = 1.04;  // 現在の所有者を押しのけるのに必要な差
 function stepInfluence(){
   for (let y=0;y<H;y++){
     const yUp=(y>0?y-1:H-1)*W, yDn=(y<H-1?y+1:0)*W, yMid=y*W;
@@ -739,16 +738,16 @@ function stepInfluence(){
       if (!land[i] || water[i] || ice[i]){ terrNext[i]=0; terrStrNext[i]=0; continue; }
 
       if (life[i]>0){
-        // occupied cell: its colony owns it. Influence injected scales with land
-        // quality (biome expansion) AND the faction's vigor (population/momentum),
-        // so growing empires on rich land push their borders outward over time.
+        // 占有されたセル：そのコロニーが所有する。注入される影響力は、土地の質
+        //（バイオーム拡張）と 勢力の勢い（人口/勢い）に応じて変化するので、
+        // 豊かな土地で成長する帝国は時間とともに国境を外へ押し広げる。
         const f=life[i];
         terrNext[i]   = f;
         terrStrNext[i]= Math.min(255, terrStr[i]*0.55 + TERR_SOURCE*biomeQuality(i)*facVigor[f]);
         continue;
       }
 
-      // empty land: competitive flood from neighbours (max strength per faction)
+      // 空き地：隣接セルからの競争的な流れ込み（勢力ごとの最大強度）
       const xL=x>0?x-1:W-1, xR=x<W-1?x+1:0;
       const ns=[yUp+xL,yUp+x,yUp+xR, yMid+xL,yMid+xR, yDn+xL,yDn+x,yDn+xR];
       const fc=_ti; let nt=0;
@@ -759,15 +758,15 @@ function stepInfluence(){
         if (fc[f]===0){ _tiT[nt++]=f; fc[f]=w; }
         else if (w>fc[f]) fc[f]=w;
       }
-      // choose strongest faction (candidate strength = flood value - decay),
-      // with inertia for whoever currently holds the cell.
+      // 最も強い勢力を選ぶ（候補の強度 = 流れ込み値 - 減衰）。
+      // 現在そのセルを保持している側には慣性を与える。
       const cur=terr[i];
       let best=0, bestV=0, curV=-1;
       for (let k=0;k<nt;k++){
         const f=_tiT[k], c=fc[f]-TERR_DECAY;
         if (f===cur) curV=c;
         if (c>bestV){ bestV=c; best=f; }
-        fc[f]=0;                                  // clear scratch
+        fc[f]=0;                                  // 作業領域をクリア
       }
       if (cur && curV>0 && best!==cur && bestV < curV*TERR_INERTIA){ best=cur; bestV=curV; }
 
@@ -780,15 +779,15 @@ function stepInfluence(){
 }
 
 /* =========================================================================
-   STEP — advance every CA layer one generation. Order matters: climate and
-   the substrate (fire, water, ice) update first, biomes are reclassified,
-   then Conway life evolves on the resulting world.
+   STEP — すべてのオートマトン層を 1 世代進める。順序が重要：まず気候と
+   下地（火・水・氷）を更新し、バイオームを再分類してから、できあがった世界の
+   上で Conway の生命が進化する。
    ========================================================================= */
 let generation = 0;
 let climateTick = 0;
 
 function step(){
-  // climate evolves slower than life (it's a background field) — every 2 gens
+  // 気候は生命よりゆっくり変化する（背景の場）── 2 世代ごと
   climateTick++;
   if (climateTick % 2 === 0){
     season += SEASON_SPEED;
@@ -800,40 +799,39 @@ function step(){
   stepWater();
   stepForest();
   classifyBiomes();
-  countFactions();          // refresh faction populations for the leaderboard
-  stepLife();   // <- the literal Conway B3/S23 rule
-  stepGliders();            // armies fly out and found beachhead colonies
-  updateFactionVigor();     // size/momentum -> how hard each faction pushes
-  stepInfluence();          // territory flows from the updated colonies
+  countFactions();          // リーダーボード用に勢力の人口を更新
+  stepLife();   // <- 正真正銘の Conway B3/S23 ルール
+  stepGliders();            // 軍隊が飛び立ち、橋頭堡コロニーを築く
+  updateFactionVigor();     // 規模/勢い -> 各勢力がどれだけ強く押すか
+  stepInfluence();          // 更新されたコロニーから領土が流れ出す
   generation++;
 }
 
-/* ---- LIFE: Conway's Game of Life (B3/S23), kept perpetually alive -------
-   Birth/death are pure Conway B3/S23. The problem with plain B3/S23 in a
-   worldbox is that colonies quickly freeze into still-lifes (unchanging
-   blocks) — which reads as "dead". To keep the world feeling alive we add a
-   small STOCHASTIC churn on fertile land: a tiny chance each generation that a
-   cell spontaneously dies, and that an empty fertile cell next to life sparks.
-   This perturbation breaks up still-lifes so colonies endlessly crawl, ripple
-   and reform — still a per-cell neighbourhood rule, just non-deterministic.
-   Faction id is carried along by a simple majority neighbour vote. */
-const _fc = new Float32Array(NFAC+1);    // reusable faction vote
-const _touched = new Int32Array(9);      // faction ids seen in the neighbourhood
-const CHURN_DEATH = 0.010;  // chance a stable cell spontaneously dies (fertile)
-const CHURN_BIRTH = 0.090;  // chance an empty fertile cell sparks beside life
+/* ---- LIFE: ライフゲーム（B3/S23）を、永遠に生かし続ける ----------------
+   誕生/死滅は純粋な Conway B3/S23。ワールドボックスで素の B3/S23 を使う問題は、
+   コロニーがすぐに静止形（変化しないブロック）に固まってしまうこと ── これは
+   「死んでいる」ように見える。世界を生き生きと保つため、肥沃な土地に小さな
+   確率的ゆらぎを加える：毎世代ごく小さな確率でセルが自然に死に、生命の隣に
+   ある空いた肥沃なセルが火花を散らす（誕生する）。この摂動が静止形を崩し、
+   コロニーは果てしなく這い、波打ち、組み替わる ── それでもセルごとの近傍則の
+   ままで、ただ非決定的なだけ。勢力 id は単純な多数決の隣接投票で受け継がれる。 */
+const _fc = new Float32Array(NFAC+1);    // 再利用する勢力投票
+const _touched = new Int32Array(9);      // 近傍で見つけた勢力 id
+const CHURN_DEATH = 0.010;  // 安定したセルが自然に死ぬ確率（肥沃）
+const CHURN_BIRTH = 0.090;  // 生命の隣の空いた肥沃なセルが火花を散らす確率
 function stepLife(){
   const fc = _fc;
   for (let y=0;y<H;y++){
     const yUp = (y>0?y-1:H-1)*W, yDn = (y<H-1?y+1:0)*W, yMid = y*W;
     for (let x=0;x<W;x++){
       const i = yMid + x;
-      // drowned / frozen / burning land is lethal to life
+      // 水没・凍結・燃えている陸は生命にとって致命的
       if (water[i] || fire[i] || ice[i]) { lifeNext[i]=0; ageNext[i]=0; continue; }
 
-      const xL = x>0?x-1:W-1, xR = x<W-1?x+1:0;   // toroidal x neighbours
-      let n=0, nt=0;                                // count, #distinct factions
-      // tally neighbours by faction; track only factions we touch so we never
-      // fill/scan the whole NFAC table (big win on a full map).
+      const xL = x>0?x-1:W-1, xR = x<W-1?x+1:0;   // トーラス状の x 近傍
+      let n=0, nt=0;                                // 個数、異なる勢力の数
+      // 近傍を勢力ごとに集計する。触れた勢力だけを追跡し、NFAC テーブル全体を
+      // 埋めたり走査したりしないようにする（満杯のマップで大きく効く）。
       let best=0, bestV=0;
       const ns = [yUp+xL,yUp+x,yUp+xR, yMid+xL,yMid+xR, yDn+xL,yDn+x,yDn+xR];
       for (let k=0;k<8;k++){
@@ -841,50 +839,50 @@ function stepLife(){
         if (!v) continue;
         n++;
         const nv = (fc[v] += 1);
-        if (nv===1) _touched[nt++]=v;            // first time we see v
+        if (nv===1) _touched[nt++]=v;            // v を初めて見たとき
         if (nv>bestV){ bestV=nv; best=v; }
       }
 
-      // fast path: a cell with no living neighbours is always dead next gen.
+      // 高速パス：生きた隣接セルが 0 個のセルは、次世代では必ず死んでいる。
       if (n===0){ lifeNext[i]=0; ageNext[i]=0; continue; }
 
       const alive = life[i] > 0;
-      // fertility from biome (grass/forest/swamp support life; desert/tundra/snow don't)
+      // バイオームからの肥沃さ（草原/森/湿地は生命を支え、砂漠/ツンドラ/雪は支えない）
       const fertile = isFertile(i);
       const harsh = biome[i]===B_DESERT || biome[i]===B_SNOW || biome[i]===B_TUNDRA;
 
       let live;
       if (alive){
-        // S23, plus S4 on fertile land so colonies are robust enough to persist.
-        // The churn-death below keeps that from freezing into static blocks.
+        // S23、加えて肥沃な土地では S4 とし、コロニーが存続できるほど頑健にする。
+        // 下の churn-death が、それが静的なブロックに固まるのを防ぐ。
         live = (n===2 || n===3) || (fertile && n===4);
-        if (live && harsh && Math.random()<0.14) live=false;          // harsh starvation
-        else if (live && fertile && Math.random()<CHURN_DEATH) live=false; // churn
+        if (live && harsh && Math.random()<0.14) live=false;          // 過酷な飢餓
+        else if (live && fertile && Math.random()<CHURN_DEATH) live=false; // ゆらぎ
       } else {
-        live = (n===3);                                   // pure Conway birth B3
-        // churn birth: an empty fertile cell that's one neighbour short of the
-        // B3 rule (n===2) often sparks anyway, feeding the colony fresh material
-        // so it grows and never settles into a frozen still-life.
+        live = (n===3);                                   // 純粋な Conway の誕生 B3
+        // ゆらぎ誕生：B3 ルールに隣接 1 つ足りない（n===2）空いた肥沃なセルも
+        // しばしば火花を散らし、コロニーに新たな材料を供給するので、成長し続け、
+        // 凍りついた静止形に落ち着くことがない。
         if (!live && fertile && n===2 && Math.random()<CHURN_BIRTH) live=true;
       }
 
       if (!live){
         lifeNext[i]=0; ageNext[i]=0;
-        for (let k=0;k<nt;k++) fc[_touched[k]]=0;   // clear before skipping
+        for (let k=0;k<nt;k++) fc[_touched[k]]=0;   // スキップ前にクリア
         continue;
       }
 
       if (alive){
-        // a surviving cell simply keeps its own faction (no conquest)
+        // 生き残ったセルは自分の勢力をそのまま保つ（征服はない）
         lifeNext[i] = life[i];
         ageNext[i] = age[i] < 255 ? age[i]+1 : 255;
       } else {
-        // newborn inherits the dominant neighbouring faction (majority vote)
+        // 新生児は隣接する優勢な勢力を受け継ぐ（多数決）
         lifeNext[i] = best || 1;
         ageNext[i] = 0;
       }
 
-      // clear only the faction slots we touched (avoids fill() over all NFAC)
+      // 触れた勢力スロットだけをクリアする（NFAC 全体への fill() を避ける）
       for (let k=0;k<nt;k++) fc[_touched[k]]=0;
     }
   }
@@ -892,10 +890,10 @@ function stepLife(){
   [age,ageNext]=[ageNext,age];
 }
 
-/* ---- FIRE: spreading Conway-family CA -------------------------------- */
-/* Fire is born where a flammable cell (forest or life) is adjacent to fire,
-   survives a few ticks, then dies (burns out). Burned forest is consumed.
-   Water never burns and stops the spread — coasts are firebreaks. */
+/* ---- FIRE: 延焼する Conway 系オートマトン ---------------------------- */
+/* 火は、燃えやすいセル（森または生命）が火に隣接した場所で生まれ、数ティック
+   生き延びてから死ぬ（燃え尽きる）。燃えた森は消費される。
+   水は決して燃えず、延焼を止める ── 海岸は防火帯となる。 */
 function stepFire(){
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
@@ -903,11 +901,11 @@ function stepFire(){
       if (water[i]) { fireNext[i]=0; continue; }
       let burning = fire[i];
       if (burning>0){
-        fireNext[i] = burning-1;            // burn down
-        if (burning-1===0){ forest[i]=0; }  // forest consumed when fire dies
+        fireNext[i] = burning-1;            // 燃え進む
+        if (burning-1===0){ forest[i]=0; }  // 火が消えるとき森が消費される
         continue;
       }
-      // not currently burning: catch fire if flammable & a neighbour burns
+      // 今は燃えていない：燃えやすく かつ 隣が燃えていれば着火する
       const flammable = forest[i] || life[i];
       if (!flammable){ fireNext[i]=0; continue; }
       let nf=0;
@@ -917,26 +915,25 @@ function stepFire(){
         if (nx<0||ny<0||nx>=W||ny>=H) continue;
         if (fire[idx(nx,ny)]>0) nf++;
       }
-      // damp/cold cells resist ignition; dry hot ones catch easily
-      const dryness = (temp[i]/255)*0.6 + (1-moist[i]/255)*0.6; // ~0..1.2
+      // 湿った/冷たいセルは着火しにくく、乾いた暑いセルは燃えやすい
+      const dryness = (temp[i]/255)*0.6 + (1-moist[i]/255)*0.6; // 約 0..1.2
       const pIgnite = Math.max(0.08, Math.min(0.92, 0.35+dryness*0.5));
-      fireNext[i] = nf>0 && Math.random()<pIgnite ? 4 : 0;  // 4-tick burn
+      fireNext[i] = nf>0 && Math.random()<pIgnite ? 4 : 0;  // 4 ティックの燃焼
     }
   }
   [fire,fireNext]=[fireNext,fire];
-  // life on a freshly-ignited cell is destroyed
+  // たった今着火したセルの上の生命は破壊される
   for (let i=0;i<N;i++) if (fire[i]>0) life[i]=0;
 }
 
-/* ---- WATER: Conway-variant flood CA ---------------------------------- */
-/* Water persists on low terrain (sea floor) and seeps onto land cells that
-   are mostly surrounded by water (coastal erosion / flooding), while land
-   well away from water stays dry. A totalistic rule, Conway-family. */
+/* ---- WATER: Conway 派生の浸水オートマトン ---------------------------- */
+/* 水は低地（海底）に留まり、ほとんど水に囲まれた陸セルへ滲み出す（海岸侵食/
+   浸水）。一方、水から十分離れた陸は乾いたままになる。総和則の Conway 系。 */
 function stepWater(){
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
       const i = idx(x,y);
-      if (!land[i]){ waterNext[i]=1; continue; }   // sea floor is always wet
+      if (!land[i]){ waterNext[i]=1; continue; }   // 海底は常に濡れている
       let nw=0;
       for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){
         if(!dx&&!dy) continue;
@@ -944,7 +941,7 @@ function stepWater(){
         if (nx<0||ny<0||nx>=W||ny>=H) continue;
         if (water[idx(nx,ny)]) nw++;
       }
-      // land cell floods if surrounded by >=5 water; drains if <=2
+      // 陸セルは水 5 つ以上に囲まれると浸水し、2 つ以下なら排水される
       if (water[i]) waterNext[i] = nw>=3 ? 1 : 0;
       else          waterNext[i] = nw>=6 ? 1 : 0;
     }
@@ -952,15 +949,14 @@ function stepWater(){
   [water,waterNext]=[waterNext,water];
 }
 
-/* ---- FOREST: slow birth/survival CA on land -------------------------- */
-/* Forest is a Conway-family growth automaton: a forest cell survives with
-   1..4 forest neighbours; a bare land cell grows forest with exactly 3
-   forest neighbours (occasionally) — vegetation spreads but not explosively.
-   Water and fire clear it. Life lightly grazes mature forest. */
+/* ---- FOREST: 陸上のゆっくりした誕生/生存オートマトン ----------------- */
+/* 森は Conway 系の成長オートマトン：森のセルは森の隣接 1..4 で生き残り、
+   裸の陸セルは森の隣接がちょうど 3 つのとき（ときどき）森を育てる ── 植生は
+   広がるが爆発的ではない。水と火はそれを消し去る。生命は成熟した森を軽く食む。 */
 let forestTick=0;
 function stepForest(){
   forestTick++;
-  if (forestTick % 3 !== 0) return;   // forest grows 3x slower than life
+  if (forestTick % 3 !== 0) return;   // 森は生命の 3 倍ゆっくり育つ
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
       const i = idx(x,y);
@@ -973,12 +969,12 @@ function stepForest(){
         if (forest[idx(nx,ny)]) nf++;
       }
       if (forest[i]){
-        // grazed away under heavy life pressure; otherwise hardy — survives even
-        // alone (so a planted oasis persists on sand), dies only if overcrowded.
+        // 強い生命の圧力で食い荒らされる。それ以外は頑健で ── 単独でも生き残る
+        //（だから砂地に植えたオアシスも存続する）、過密のときだけ枯れる。
         if (life[i] && Math.random()<0.06) forestNext[i]=0;
         else forestNext[i] = (nf<=6) ? 1 : 0;
       } else {
-        // spreads onto neighbouring land with ~3 forest neighbours
+        // 森の隣接が約 3 つの隣の陸へ広がる
         forestNext[i] = (nf===3 && Math.random()<0.5) ? 1 : 0;
       }
     }
@@ -987,42 +983,42 @@ function stepForest(){
 }
 
 /* =========================================================================
-   RENDERING — composite the CA layers into one image. Drawn bottom-up:
-   deep sea, shallow water, land, forest, fire, then living colonies on top.
+   描画 — オートマトン層を 1 枚の画像に合成する。下から順に描く：
+   深海、浅瀬、陸、森、火、そして最後に生きたコロニーを上に重ねる。
    ========================================================================= */
-let imgData = null;     // ImageData blitted to canvas
-let pix = null;         // Uint32 view of imgData (one write per pixel)
-let dither = null;      // per-cell deterministic brightness jitter (-6..+6)
+let imgData = null;     // canvas に転送する ImageData
+let pix = null;         // imgData の Uint32 ビュー（1 ピクセルにつき 1 回書き込み）
+let dither = null;      // セルごとの決定論的な明るさのゆらぎ（-6..+6）
 let cap = (v) => v<0?0:v>255?255:v|0;
 
 function ensureImg(){
   if (!imgData || imgData.width!==W || imgData.height!==H){
     imgData = ctx.createImageData(W, H);
     pix = new Uint32Array(imgData.data.buffer);
-    // stable per-cell jitter so flat biomes get subtle texture (not random noise
-    // each frame, which would shimmer everywhere — only water shimmers).
+    // セルごとの安定したゆらぎで、平坦なバイオームに微妙な質感を与える（毎フレーム
+    // ランダムなノイズだとどこもちらついてしまう ── ちらつくのは水だけ）。
     dither = new Int8Array(N);
     for (let i=0;i<N;i++){
-      let h = (i*2654435761) >>> 0;        // cheap integer hash
+      let h = (i*2654435761) >>> 0;        // 軽い整数ハッシュ
       dither[i] = ((h & 15) - 7);          // -7..+8
     }
   }
 }
 
-// pack r,g,b -> little-endian 0xAABBGGRR (canvas byte order is RGBA)
+// r,g,b をパックする -> リトルエンディアン 0xAABBGGRR（canvas のバイト順は RGBA）
 function rgba(r,g,b){ return 0xff000000 | (cap(b)<<16) | (cap(g)<<8) | cap(r); }
 
 let drawFrame = 0;
 function draw(){
   ensureImg();
   drawFrame++;
-  const shimmer = Math.sin(drawFrame*0.18);    // global water shimmer phase
+  const shimmer = Math.sin(drawFrame*0.18);    // 全体の水のきらめき位相
   for (let y=0;y<H;y++){
     for (let x=0;x<W;x++){
       const i = y*W + x;
       let r,g,b;
       if (fire[i]>0){
-        // fire: hot core + per-cell per-frame flicker -> living flame
+        // 火：熱い芯 + セルごと・フレームごとのちらつき -> 生きた炎
         const t = fire[i];
         const flick = ((i*97 + drawFrame*53) & 31) - 12;
         r=255; g=110+t*32+flick; b=24+t*10;
@@ -1035,28 +1031,28 @@ function draw(){
         const col = BIOME_COL[bm] || BIOME_COL[B_SEA];
         r=col[0]; g=col[1]; b=col[2];
         if (bm===B_SEA || bm===B_SHALLOW){
-          // animated water: gentle shimmer + a depth feel from a slow gradient
+          // 動く水：穏やかなきらめき + ゆっくりした勾配による深さの感じ
           const s = shimmer * (bm===B_SHALLOW?7:4);
           const ds = dither[i]*0.4;
           r+=s+ds; g+=s+ds; b+=s*1.4+ds;
         } else if (bm===B_ICE || bm===B_SNOW){
-          // ice/snow: bright with a faint cool sparkle
+          // 氷/雪：明るく、かすかに冷たいきらめき
           const sp = ((i*131 + drawFrame*17)&31)===0 ? 22 : 0;
           r+=dither[i]*0.6+sp; g+=dither[i]*0.6+sp; b+=dither[i]*0.6+sp;
         } else {
-          // land: temperature tint (warm=redder, cool=bluer) + relief shading.
-          // coastal cells (touching sea) are darkened to read as a shoreline.
+          // 陸：気温による色味（暖=赤寄り、冷=青寄り）+ 起伏の陰影。
+          // 海岸セル（海に接する）は暗くして海岸線として読み取れるようにする。
           const warm = (temp[i]-128)/255;
           r += warm*26 + dither[i]; g += dither[i]; b += -warm*26 + dither[i];
-          // cheap relief: compare to the cell above; brighten south-facing slopes
+          // 軽い起伏：上のセルと比べ、南向きの斜面を明るくする
           if (y>0){
             const up=i-W;
-            if (!land[up]) { r-=22; g-=22; b-=18; }          // coast shadow vs sea
+            if (!land[up]) { r-=22; g-=22; b-=18; }          // 海に対する海岸の影
             else if (forest[up] && !forest[i]) { r+=6; g+=8; }
           }
-          // POLITICAL MAP: tint owned land by its faction; stronger hold = more
-          // saturated, and the border (a sharp strength drop) reads as a coastline
-          // of colour. Empty unclaimed land keeps its natural biome colour.
+          // 政治地図：所有された陸をその勢力色で染める。保持が強いほど彩度が
+          // 上がり、国境（強度の急な落差）は色の海岸線として読み取れる。
+          // 所有されていない空き地は本来のバイオーム色を保つ。
           const f = terr[i];
           if (f){
             const fcol = FACTIONS[(f-1)%NFAC];
@@ -1068,20 +1064,20 @@ function draw(){
       pix[i] = rgba(r,g,b);
     }
   }
-  drawGliders();             // bright flying armies + trails, on top of everything
-  // scale the WxH image up to the canvas — nearest-neighbour, no blur
+  drawGliders();             // 明るく飛ぶ軍隊 + 軌跡を、すべての上に重ねる
+  // WxH の画像を canvas まで拡大する ── 最近傍補間、ぼかしなし
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(scaleCanvas(), 0, 0, W, H, 0, 0, cv.width, cv.height);
 }
 
-// draw each glider as a bright faction-tinted head with a short fading trail
+// 各グライダーを、明るい勢力色の頭と短く消えていく軌跡として描く
 function drawGliders(){
   for (const g of gliders){
     const fc = FACTIONS[(g.fac-1)%NFAC];
     for (let t=0; t<5; t++){
       const px=(g.x - g.vx*t)|0, py=(g.y - g.vy*t)|0;
       if (px<0||py<0||px>=W||py>=H) continue;
-      const b = t===0 ? 1 : 0.55/t;               // head brightest, trail fades
+      const b = t===0 ? 1 : 0.55/t;               // 頭が最も明るく、軌跡は薄れる
       const r = fc[0] + (255-fc[0])*b;
       const gg= fc[1] + (255-fc[1])*b;
       const bb= fc[2] + (255-fc[2])*b;
@@ -1089,7 +1085,7 @@ function drawGliders(){
     }
   }
 }
-// putImageData ignores transform, so blit through a small backing canvas
+// putImageData は変換を無視するので、小さな下地 canvas を経由して転送する
 let _back=null, _bctx=null;
 function scaleCanvas(){
   if(!_back){ _back=document.createElement('canvas'); _bctx=_back.getContext('2d'); }
@@ -1099,17 +1095,17 @@ function scaleCanvas(){
 }
 
 /* =========================================================================
-   TOOLS — every god power writes into a CA grid. Pure Conway underneath.
+   TOOLS — どの神の力もオートマトン・グリッドに書き込む。土台は純粋な Conway。
    ========================================================================= */
 const TOOLS = [
-  { id:'life',    name:'Life',    icon:'🦠', hint:'paint living cells (a Conway soup)' },
-  { id:'colony',  name:'Colony',  icon:'🏙️', hint:'drop a new faction colony' },
-  { id:'land',    name:'Raise',   icon:'⛰️', hint:'raise land from the sea' },
-  { id:'water',   name:'Water',   icon:'🌊', hint:'flood with water' },
-  { id:'forest',  name:'Forest',  icon:'🌲', hint:'plant forest on land' },
-  { id:'fire',    name:'Fire',    icon:'🔥', hint:'ignite — fire spreads & burns' },
-  { id:'meteor',  name:'Meteor',  icon:'☄️', hint:'impact: crater + firestorm' },
-  { id:'erase',   name:'Erase',   icon:'🩹', hint:'wipe life, fire & forest' },
+  { id:'life',    name:'生命',     icon:'🦠', hint:'生きたセルを描く（Conway のスープ）' },
+  { id:'colony',  name:'コロニー', icon:'🏙️', hint:'新しい勢力のコロニーを置く' },
+  { id:'land',    name:'隆起',     icon:'⛰️', hint:'海から陸を隆起させる' },
+  { id:'water',   name:'水',       icon:'🌊', hint:'水で浸す' },
+  { id:'forest',  name:'森',       icon:'🌲', hint:'陸に森を植える' },
+  { id:'fire',    name:'火',       icon:'🔥', hint:'着火 ── 火は広がり燃える' },
+  { id:'meteor',  name:'隕石',     icon:'☄️', hint:'衝突：クレーター + 火の嵐' },
+  { id:'erase',   name:'消去',     icon:'🩹', hint:'生命・火・森を消し去る' },
 ];
 let currentTool = 'life';
 
@@ -1141,7 +1137,7 @@ function applyTool(cx, cy, brush){
           life[i]=0; fire[i]=0; forest[i]=0;
           break;
         case 'meteor':
-          // crater: clears everything, raises ring debris, ignites edge
+          // クレーター：すべてを消し、外縁に瓦礫を盛り上げ、縁を燃やす
           land[i]=1; water[i]=0; forest[i]=0; life[i]=0;
           if (dx*dx+dy*dy > (r-2)*(r-2)) fire[i]=4; else fire[i]=0;
           break;
@@ -1153,10 +1149,10 @@ function applyTool(cx, cy, brush){
 }
 
 /* =========================================================================
-   MAIN LOOP
+   メインループ
    ========================================================================= */
 let running = true;
-let speed = 18;               // generations per second
+let speed = 18;               // 1 秒あたりの世代数
 let acc = 0, last = performance.now();
 
 function frame(now){
@@ -1167,25 +1163,25 @@ function frame(now){
     let steps=0;
     while (acc >= interval && steps<4){ step(); acc-=interval; steps++; }
     if (steps>0){ draw(); updateStats(); }
-    else draw();                // still redraw for water shimmer / fire flicker
+    else draw();                // 水のきらめき / 火のちらつきのため再描画は続ける
   } else {
-    draw();                     // keep the world animating (shimmer) while paused
+    draw();                     // 一時停止中も世界のアニメ（きらめき）を保つ
   }
   requestAnimationFrame(frame);
 }
 
 /* =========================================================================
-   STATS — count populations & estimate distinct civilizations.
+   STATS — 人口を数え、独立した文明の数を推定する。
    ========================================================================= */
-const SEASON_NAMES=['🌱 Spring','☀️ Summer','🍂 Autumn','❄️ Winter'];
+const SEASON_NAMES=['🌱 春','☀️ 夏','🍂 秋','❄️ 冬'];
 function seasonName(){
-  // map sin-phase: peak warm = summer, trough = winter
+  // sin の位相を対応づける：暖かさのピーク = 夏、谷 = 冬
   const s=((season%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
   const q=Math.floor(((s)/(Math.PI/2)))%4;
   return SEASON_NAMES[q];
 }
 function updateStats(){
-  countFactions();   // keep facPop fresh even when paused / after painting
+  countFactions();   // 一時停止中 / 描画後でも facPop を最新に保つ
   let pop=0, waterC=0, fireC=0, landC=0, iceC=0, tSum=0, mSum=0;
   for (let i=0;i<N;i++){
     if (life[i]) pop++;
@@ -1197,22 +1193,22 @@ function updateStats(){
   }
   let civs=0; for (let f=1;f<=NFAC;f++) if (facPop[f]>4) civs++;
   const avgT=Math.round(tSum/N), avgM=Math.round(mSum/N);
-  const tempC=Math.round((avgT/255)*60-15);   // map 0..255 -> ~ -15..45 °C feel
+  const tempC=Math.round((avgT/255)*60-15);   // 0..255 を ~ -15..45 ℃ の感覚に対応づけ
   document.getElementById('stats').innerHTML =
-    `Generation <b>${generation}</b> · ${seasonName()}<br/>`+
-    `Living cells <b>${pop}</b> · Civs <b>${civs}</b><br/>`+
-    `Avg temp <b>${tempC}°</b> · Humidity <b>${Math.round(avgM/255*100)}%</b><br/>`+
-    `Ice <b>${iceC}</b> · Fire <b>${fireC}</b><br/>`+
-    `Land <b>${Math.round(landC/N*100)}%</b> · Sea <b>${Math.round(waterC/N*100)}%</b>`;
+    `世代 <b>${generation}</b> · ${seasonName()}<br/>`+
+    `生きたセル <b>${pop}</b> · 文明 <b>${civs}</b><br/>`+
+    `平均気温 <b>${tempC}°</b> · 湿度 <b>${Math.round(avgM/255*100)}%</b><br/>`+
+    `氷 <b>${iceC}</b> · 火 <b>${fireC}</b><br/>`+
+    `陸 <b>${Math.round(landC/N*100)}%</b> · 海 <b>${Math.round(waterC/N*100)}%</b>`;
 
-  // ---- faction leaderboard: bar per civilization, sorted by population -----
+  // ---- 勢力リーダーボード：文明ごとのバー、人口順にソート -----
   const rows=[];
   for (let f=1; f<=NFAC; f++) if (facPop[f]>0) rows.push(f);
   rows.sort((a,b)=>facPop[b]-facPop[a]);
   const maxP = rows.length ? facPop[rows[0]] : 1;
   let html='';
   if (!rows.length){
-    html='<div class="hint">No civilizations — paint life or drop a colony.</div>';
+    html='<div class="hint">文明がありません ── 生命を描くか、コロニーを置いてください。</div>';
   } else {
     for (const f of rows){
       const c=FACTIONS[(f-1)%NFAC];
@@ -1235,7 +1231,7 @@ function updateStats(){
 }
 
 /* =========================================================================
-   UI WIRING
+   UI の配線
    ========================================================================= */
 function buildTools(){
   const wrap=document.getElementById('tools');
@@ -1257,12 +1253,12 @@ function selectTool(id){
 function rgb(a){ return `rgb(${a[0]},${a[1]},${a[2]})`; }
 function buildLegend(){
   const items=[
-    [rgb(BIOME_COL[B_SEA]),'Sea'],       [rgb(BIOME_COL[B_ICE]),'Ice'],
-    [rgb(BIOME_COL[B_SNOW]),'Snow'],     [rgb(BIOME_COL[B_TUNDRA]),'Tundra'],
-    [rgb(BIOME_COL[B_DESERT]),'Desert'], [rgb(BIOME_COL[B_GRASS]),'Grassland'],
-    [rgb(BIOME_COL[B_FOREST]),'Forest'], [rgb(BIOME_COL[B_SWAMP]),'Swamp'],
-    ['#ff7820','Fire'],                  ['#4ea8de','Civilization'],
-    ['#4ea8de88','Territory'],           ['#ffffff','Army (glider)'],
+    [rgb(BIOME_COL[B_SEA]),'海'],         [rgb(BIOME_COL[B_ICE]),'氷'],
+    [rgb(BIOME_COL[B_SNOW]),'雪'],        [rgb(BIOME_COL[B_TUNDRA]),'ツンドラ'],
+    [rgb(BIOME_COL[B_DESERT]),'砂漠'],    [rgb(BIOME_COL[B_GRASS]),'草原'],
+    [rgb(BIOME_COL[B_FOREST]),'森'],      [rgb(BIOME_COL[B_SWAMP]),'湿地'],
+    ['#ff7820','火'],                     ['#4ea8de','文明'],
+    ['#4ea8de88','領土'],                 ['#ffffff','軍隊（グライダー）'],
   ];
   document.getElementById('legend').innerHTML = items.map(
     ([c,n])=>`<div class="li"><span class="sw" style="background:${c}"></span>${n}</div>`
@@ -1279,25 +1275,25 @@ function toast(msg){
 function setRunning(r){
   running=r;
   const b=document.getElementById('playBtn');
-  b.textContent = r ? '⏸ Pause' : '▶ Play';
+  b.textContent = r ? '⏸ 一時停止' : '▶ 再生';
   b.classList.toggle('paused', !r);
 }
 
-/* ---- canvas sizing & pointer ----------------------------------------- */
-/* The canvas fills the whole stage. The world grid (W×H) is derived from the
-   stage size divided by CELL, so the simulation resolution follows the window
-   and the map always fills the screen edge-to-edge. The low-res image is then
-   blitted up with nearest-neighbour scaling (no blur). */
+/* ---- canvas のサイズ調整とポインタ ----------------------------------- */
+/* canvas はステージ全体を埋める。ワールドグリッド（W×H）はステージサイズを
+   CELL で割って求めるので、シミュレーションの解像度はウィンドウに追従し、
+   マップは常に画面の端から端まで埋める。低解像度の画像はその後、最近傍補間で
+   拡大転送される（ぼかしなし）。 */
 let resizeTimer=null;
 function resize(){
   const stage=document.getElementById('stage');
   const availW=stage.clientWidth, availH=stage.clientHeight;
   if (availW<2||availH<2) return;
 
-  // canvas backing store == screen pixels (crisp 1:1 with display)
+  // canvas のバッキングストア == 画面ピクセル（ディスプレイと 1:1 で鮮明）
   cv.width=availW; cv.height=availH;
 
-  // desired grid size from CELL; reallocate + regenerate only if it changed
+  // CELL から求めた望ましいグリッドサイズ。変わったときだけ再確保 + 再生成する
   const newW=Math.max(40, Math.round(availW/CELL));
   const newH=Math.max(40, Math.round(availH/CELL));
   if (newW!==W || newH!==H){
@@ -1305,14 +1301,14 @@ function resize(){
     allocGrids();
     imgData=null;
     generation=0;
-    generateWorld();   // generateWorld() calls draw()
+    generateWorld();   // generateWorld() が draw() を呼ぶ
   } else {
     draw();
   }
 }
 window.addEventListener('resize', ()=>{
   clearTimeout(resizeTimer);
-  resizeTimer=setTimeout(resize, 150);   // debounce: regen is expensive
+  resizeTimer=setTimeout(resize, 150);   // デバウンス：再生成は重い
 });
 
 let painting=false;
@@ -1329,13 +1325,13 @@ cv.addEventListener('pointerdown', e=>{
 cv.addEventListener('pointermove', e=>{
   const [x,y]=canvasToCell(e);
   document.getElementById('overlay-info').textContent =
-    `(${x}, ${y})  ·  tool: ${TOOLS.find(t=>t.id===currentTool).name}  ·  brush ${brush.value}`;
+    `(${x}, ${y})  ·  道具: ${TOOLS.find(t=>t.id===currentTool).name}  ·  ブラシ ${brush.value}`;
   if (painting) applyTool(x,y,+brush.value);
 });
 cv.addEventListener('pointerup', ()=>painting=false);
 cv.addEventListener('pointerleave', ()=>{ document.getElementById('overlay-info').textContent=''; });
 
-/* ---- controls -------------------------------------------------------- */
+/* ---- コントロール ---------------------------------------------------- */
 const brush=document.getElementById('brush');
 brush.oninput=()=>document.getElementById('brushVal').textContent=brush.value;
 const speedEl=document.getElementById('speed');
@@ -1344,15 +1340,15 @@ const resEl=document.getElementById('res');
 resEl.oninput=()=>{
   CELL=+resEl.value;
   document.getElementById('resVal').textContent=CELL+'px';
-  resize();   // rebuilds the grid at the new resolution
+  resize();   // 新しい解像度でグリッドを作り直す
 };
 
 document.getElementById('playBtn').onclick=()=>setRunning(!running);
 document.getElementById('stepBtn').onclick=()=>{ step(); draw(); updateStats(); };
-document.getElementById('clearBtn').onclick=()=>{ life.fill(0); fire.fill(0); draw(); updateStats(); toast('🧹 Life cleared'); };
+document.getElementById('clearBtn').onclick=()=>{ life.fill(0); fire.fill(0); draw(); updateStats(); toast('🧹 生命を消去しました'); };
 
-/* ---- world-generation controls --------------------------------------- */
-// links each slider/input to its worldParams field + a live label formatter.
+/* ---- ワールド生成のコントロール -------------------------------------- */
+// 各スライダー/入力を worldParams のフィールド + 実時間ラベル整形関数に結びつける。
 const GEN = [
   ['p_sea',     'seaLevel',    v=>v/100,  v=>Math.round(v*100)],
   ['p_smooth',  'landSmooth',  v=>v,      v=>v],
@@ -1361,10 +1357,10 @@ const GEN = [
   ['p_forest',  'forestDens',  v=>v/100,  v=>v+'%'],
   ['p_col',     'colonies',    v=>v,      v=>v],
 ];
-function syncGenUI(){      // worldParams -> sliders & labels
+function syncGenUI(){      // worldParams -> スライダーとラベル
   for (const [id,key,toParam] of GEN){
     const el=document.getElementById(id);
-    // invert toParam to set slider from the stored param
+    // 格納されたパラメータからスライダーを設定するため toParam を逆算する
     let raw;
     if (key==='seaLevel') raw=Math.round(worldParams[key]*100);
     else if (key==='forestDens') raw=Math.round(worldParams[key]*100);
@@ -1384,7 +1380,7 @@ for (const [id,key,toParam,toLabel] of GEN){
 }
 document.getElementById('p_seed').oninput=e=>{ worldParams.seed=+e.target.value||0; };
 
-function doGenerate(msg){ generation=0; generateWorld(); toast(msg||'🌐 A new world is born'); }
+function doGenerate(msg){ generation=0; generateWorld(); toast(msg||'🌐 新しい世界が誕生'); }
 document.getElementById('genBtn').onclick=()=>doGenerate();
 document.getElementById('randBtn').onclick=()=>{
   worldParams.seaLevel   = 0.34 + Math.random()*0.24;
@@ -1395,17 +1391,17 @@ document.getElementById('randBtn').onclick=()=>{
   worldParams.colonies   = 2 + Math.floor(Math.random()*18);
   worldParams.seed       = Math.floor(Math.random()*1e6);
   syncGenUI();
-  doGenerate('🎲 Random world');
+  doGenerate('🎲 ランダムな世界');
 };
 
-/* preset worlds — named starting conditions */
+/* プリセットの世界 — 名前付きの開始条件 */
 const PRESETS = [
-  ['🌍 Continents', {seaLevel:0.46, landSmooth:9, climate:0,   humidity:0,   forestDens:0.20, colonies:7}],
-  ['🏝️ Archipelago',{seaLevel:0.36, landSmooth:5, climate:8,   humidity:30,  forestDens:0.25, colonies:10}],
-  ['🏜️ Desert',     {seaLevel:0.50, landSmooth:8, climate:45,  humidity:-65, forestDens:0.03, colonies:5}],
-  ['❄️ Ice Age',    {seaLevel:0.48, landSmooth:8, climate:-50, humidity:10,  forestDens:0.10, colonies:5}],
-  ['🌴 Jungle',     {seaLevel:0.50, landSmooth:9, climate:30,  humidity:70,  forestDens:0.45, colonies:8}],
-  ['🌐 Pangaea',    {seaLevel:0.58, landSmooth:14,climate:0,   humidity:0,   forestDens:0.20, colonies:9}],
+  ['🌍 大陸',       {seaLevel:0.46, landSmooth:9, climate:0,   humidity:0,   forestDens:0.20, colonies:7}],
+  ['🏝️ 群島',       {seaLevel:0.36, landSmooth:5, climate:8,   humidity:30,  forestDens:0.25, colonies:10}],
+  ['🏜️ 砂漠',       {seaLevel:0.50, landSmooth:8, climate:45,  humidity:-65, forestDens:0.03, colonies:5}],
+  ['❄️ 氷河期',     {seaLevel:0.48, landSmooth:8, climate:-50, humidity:10,  forestDens:0.10, colonies:5}],
+  ['🌴 ジャングル', {seaLevel:0.50, landSmooth:9, climate:30,  humidity:70,  forestDens:0.45, colonies:8}],
+  ['🌐 パンゲア',   {seaLevel:0.58, landSmooth:14,climate:0,   humidity:0,   forestDens:0.20, colonies:9}],
 ];
 function buildPresets(){
   const wrap=document.getElementById('presets');
@@ -1415,7 +1411,7 @@ function buildPresets(){
     el.className='preset'; el.textContent=name;
     el.onclick=()=>{
       Object.assign(worldParams, cfg);
-      worldParams.seed=0;               // fresh each click
+      worldParams.seed=0;               // クリックごとに新規
       syncGenUI();
       doGenerate(name);
     };
@@ -1428,8 +1424,8 @@ window.addEventListener('keydown', e=>{
   switch(e.key){
     case ' ': e.preventDefault(); setRunning(!running); break;
     case 's': case 'S': step(); draw(); updateStats(); break;
-    case 'c': case 'C': life.fill(0); fire.fill(0); draw(); updateStats(); toast('🧹 Life cleared'); break;
-    case 'n': case 'N': generation=0; generateWorld(); toast('🌐 A new world is born'); break;
+    case 'c': case 'C': life.fill(0); fire.fill(0); draw(); updateStats(); toast('🧹 生命を消去しました'); break;
+    case 'n': case 'N': generation=0; generateWorld(); toast('🌐 新しい世界が誕生'); break;
     case '[': brush.value=Math.max(1,+brush.value-1); brush.oninput(); break;
     case ']': brush.value=Math.min(40,+brush.value+1); brush.oninput(); break;
     default:
@@ -1437,12 +1433,12 @@ window.addEventListener('keydown', e=>{
   }
 });
 
-/* ---- boot ------------------------------------------------------------ */
+/* ---- 起動 ------------------------------------------------------------ */
 buildTools();
 buildLegend();
 buildPresets();
 syncGenUI();
-resize();          // sizes the grid to the screen and generates the world
+resize();          // グリッドを画面に合わせ、世界を生成する
 setRunning(true);
 requestAnimationFrame(frame);
 </script>
