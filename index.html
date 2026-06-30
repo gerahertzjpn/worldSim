@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Conway's Game of Life</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #f5f5f5;
+    }
+
+    canvas {
+      background: white;
+      border: 1px solid #333;
+      margin-top: 20px;
+    }
+
+    .info {
+      margin-top: 10px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Conway's Game of Life</h1>
+
+  <canvas id="game"></canvas>
+
+  <div class="info">
+    Space: 一時停止/開始 |
+    左クリック: セルを置く |
+    右クリック: セルを消す |
+    G: グライダー |
+    R: ランダム |
+    C: クリア |
+    + / -: 速度
+  </div>
+
+  <p id="stats"></p>
+
+  <script>
+    const CELL_SIZE = 12;
+    const COLS = 70;
+    const ROWS = 45;
+    const WIDTH = COLS * CELL_SIZE;
+    const HEIGHT = ROWS * CELL_SIZE;
+
+    const ALIVE = 1;
+    const DEAD = 0;
+
+    const canvas = document.getElementById("game");
+    const ctx = canvas.getContext("2d");
+    const stats = document.getElementById("stats");
+
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+
+    let grid = Array.from({ length: ROWS }, () => Array(COLS).fill(DEAD));
+    let running = true;
+    let generation = 0;
+    let speedMs = 120;
+
+    function placeGlider(row, col) {
+      const pattern = [
+        [0, 1],
+        [1, 2],
+        [2, 0],
+        [2, 1],
+        [2, 2]
+      ];
+
+      for (const [dr, dc] of pattern) {
+        const r = row + dr;
+        const c = col + dc;
+        if (r >= 0 && r < ROWS && c >= 0 && c < COLS) {
+          grid[r][c] = ALIVE;
+        }
+      }
+    }
+
+    function countNeighbors(row, col) {
+      let count = 0;
+
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+
+          const nr = row + dr;
+          const nc = col + dc;
+
+          if (nr >= 0 && nr < ROWS && nc >= 0 && nc < COLS) {
+            count += grid[nr][nc];
+          }
+        }
+      }
+
+      return count;
+    }
+
+    function nextGeneration() {
+      const newGrid = Array.from({ length: ROWS }, () => Array(COLS).fill(DEAD));
+
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const neighbors = countNeighbors(row, col);
+          const cell = grid[row][col];
+
+          if (cell === ALIVE) {
+            if (neighbors === 2 || neighbors === 3) {
+              newGrid[row][col] = ALIVE;
+            }
+          } else {
+            if (neighbors === 3) {
+              newGrid[row][col] = ALIVE;
+            }
+          }
+        }
+      }
+
+      grid = newGrid;
+      generation++;
+    }
+
+    function drawGrid() {
+      ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+      let aliveCells = 0;
+
+      for (let row = 0; row < ROWS; row++) {
+        for (let col = 0; col < COLS; col++) {
+          const x = col * CELL_SIZE;
+          const y = row * CELL_SIZE;
+
+          if (grid[row][col] === ALIVE) {
+            ctx.fillStyle = "black";
+            aliveCells++;
+          } else {
+            ctx.fillStyle = "white";
+          }
+
+          ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
+          ctx.strokeStyle = "#eeeeee";
+          ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
+        }
+      }
+
+      const state = running ? "実行中" : "一時停止";
+      stats.textContent =
+        `世代: ${generation} | 生きているセル: ${aliveCells} | 状態: ${state} | 速度: ${speedMs}ms`;
+    }
+
+    function update() {
+      if (running) {
+        nextGeneration();
+      }
+
+      drawGrid();
+      setTimeout(update, speedMs);
+    }
+
+    function getCellPosition(event) {
+      const rect = canvas.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const y = event.clientY - rect.top;
+
+      return {
+        col: Math.floor(x / CELL_SIZE),
+        row: Math.floor(y / CELL_SIZE)
+      };
+    }
+
+    canvas.addEventListener("mousedown", function(event) {
+      const pos = getCellPosition(event);
+
+      if (event.button === 0) {
+        grid[pos.row][pos.col] = ALIVE;
+      } else if (event.button === 2) {
+        grid[pos.row][pos.col] = DEAD;
+      }
+
+      drawGrid();
+    });
+
+    canvas.addEventListener("contextmenu", function(event) {
+      event.preventDefault();
+    });
+
+    document.addEventListener("keydown", function(event) {
+      if (event.key === " ") {
+        running = !running;
+      } else if (event.key === "g" || event.key === "G") {
+        placeGlider(5, 5);
+      } else if (event.key === "r" || event.key === "R") {
+        grid = Array.from({ length: ROWS }, () =>
+          Array.from({ length: COLS }, () => Math.random() < 0.25 ? ALIVE : DEAD)
+        );
+        generation = 0;
+      } else if (event.key === "c" || event.key === "C") {
+        grid = Array.from({ length: ROWS }, () => Array(COLS).fill(DEAD));
+        generation = 0;
+      } else if (event.key === "+") {
+        speedMs = Math.max(20, speedMs - 20);
+      } else if (event.key === "-") {
+        speedMs = Math.min(1000, speedMs + 20);
+      }
+
+      drawGrid();
+    });
+
+    placeGlider(5, 5);
+    update();
+  </script>
+</body>
+</html>
