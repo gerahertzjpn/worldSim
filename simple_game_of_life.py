@@ -1,16 +1,16 @@
 """
-Simple Conway's Game of Life
-Запуск:
+シンプルなライフゲーム（Conway's Game of Life）
+起動方法:
     python simple_game_of_life.py
 
-Управление:
-    Space  — старт / пауза
-    ЛКМ    — поставить живую клетку
-    ПКМ    — удалить клетку
-    G      — поставить glider, который "ползёт" по полю
-    R      — случайное поле
-    C      — очистить поле
-    + / -  — быстрее / медленнее
+操作方法:
+    Space  — 開始 / 一時停止
+    左クリック — 生きたセルを置く
+    右クリック — セルを消す
+    G      — フィールド上を「進む」グライダーを置く
+    R      — ランダムなフィールド
+    C      — フィールドをクリア
+    + / -  — 速く / 遅く
 """
 
 import random
@@ -42,7 +42,7 @@ class GameOfLife:
 
         self.info = tk.Label(
             root,
-            text="Space: pause/start | ЛКМ: draw | ПКМ: erase | G: glider | R: random | C: clear | +/-: speed",
+            text="Space: 一時停止/開始 | 左クリック: 描画 | 右クリック: 消去 | G: グライダー | R: ランダム | C: クリア | +/-: 速度",
             font=("Arial", 10)
         )
         self.info.pack()
@@ -65,7 +65,7 @@ class GameOfLife:
         self.root.bind("+", self.speed_up)
         self.root.bind("-", self.slow_down)
 
-        # Стартовый glider, чтобы сразу было видно "движение"
+        # すぐに「動き」が見えるように、開始時のグライダーを配置
         self.place_glider(5, 5)
 
         self.update()
@@ -88,7 +88,7 @@ class GameOfLife:
         self.running = not self.running
 
     def place_glider_key(self, event=None):
-        # Ставим glider примерно в левый верхний угол
+        # グライダーをだいたい左上の角に置く
         self.place_glider(5, 5)
         self.draw_grid()
 
@@ -113,8 +113,8 @@ class GameOfLife:
 
     def place_glider(self, row, col):
         """
-        Glider — маленькая фигура, которая из-за правил Game of Life
-        визуально движется по диагонали.
+        グライダー — ライフゲームのルールによって
+        見た目上、斜めに移動していく小さなパターン。
         """
         pattern = [
             (0, 1),
@@ -155,13 +155,13 @@ class GameOfLife:
                 cell = self.grid[row][col]
 
                 if cell == ALIVE:
-                    # Живая клетка выживает, если у неё 2 или 3 соседа
+                    # 生きたセルは、隣接セルが2つか3つなら生き残る
                     if neighbors == 2 or neighbors == 3:
                         new_grid[row][col] = ALIVE
                     else:
                         new_grid[row][col] = DEAD
                 else:
-                    # Мёртвая клетка рождается, если у неё ровно 3 соседа
+                    # 死んだセルは、隣接セルがちょうど3つなら誕生する
                     if neighbors == 3:
                         new_grid[row][col] = ALIVE
 
@@ -184,9 +184,9 @@ class GameOfLife:
                     self.canvas.create_rectangle(x1, y1, x2, y2, fill="white", outline="#eeeeee")
 
         alive_cells = sum(sum(row) for row in self.grid)
-        state = "идёт" if self.running else "пауза"
+        state = "実行中" if self.running else "一時停止"
         self.stats.config(
-            text=f"Поколение: {self.generation} | Живых клеток: {alive_cells} | Состояние: {state} | Скорость: {self.speed_ms} ms"
+            text=f"世代: {self.generation} | 生きているセル: {alive_cells} | 状態: {state} | 速度: {self.speed_ms} ms"
         )
 
     def update(self):
